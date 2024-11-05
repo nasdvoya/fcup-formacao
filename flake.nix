@@ -39,21 +39,7 @@
     in
     {
       overlays.default = final: prev: {
-        rustToolchain =
-          let
-            rust = prev.rust-bin;
-          in
-          if builtins.pathExists ./rust-toolchain.toml then
-            rust.fromRustupToolchainFile ./rust-toolchain.toml
-          else if builtins.pathExists ./rust-toolchain then
-            rust.fromRustupToolchainFile ./rust-toolchain
-          else
-            rust.stable.latest.default.override {
-              extensions = [
-                "rust-src"
-                "rustfmt"
-              ];
-            };
+        rustToolchain = final.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
       };
 
       devShells = forEachSupportedSystem (
@@ -61,15 +47,13 @@
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
-              tailwindcss
-              nodejs
               rustToolchain
               openssl
               pkg-config
               cargo-deny
               cargo-edit
               cargo-watch
-              sqlx-cli
+              rust-analyzer
             ];
 
             env = {
