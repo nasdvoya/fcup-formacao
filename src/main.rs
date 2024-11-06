@@ -13,3 +13,9 @@ fn main() {
         println!("Computers says no.. {} is the correct answer", computer_says)
     }
 }
+
+fn tupulo() {
+    let tuple = (500, 100);
+    let (x, y) = tuple;
+    println!("Isto vai destrui o tupulo, Valor {x} , {y}");
+}
