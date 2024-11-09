@@ -3,6 +3,7 @@ use rand::{random, Rng};
 fn main() {
     //one_try_guess_game();
     endless_guess_game();
+    calculator();
 }
 
 fn tupulo() {
@@ -43,3 +44,29 @@ fn endless_guess_game() -> () {
         }
     }
 }
+
+fn calculator() -> () {
+    println!("Chose an operation, add, sub, mul, div");
+    let input = String::new();
+
+    if input.trim().to_string() == "add" {
+        cal_add();
+    } else if input.trim().to_string() == "sub" {
+        cal_sub();
+    } else if input.trim().to_string() == "mul" {
+        cal_mul();
+    } else if input.trim().to_string() == "div" {
+        cal_div();
+    }
+}
+
+fn cal_add() {
+    print!("Insert the first number: ");
+    let mut input1 = String::new();
+    let mut input2 = String::new();
+    std::io::stdin().read_line(&mut input1).expect("Failed to read line");
+    std::io::stdin().read_line(&mut input2).expect("Failed to read line");
+}
+fn cal_sub() {}
+fn cal_mul() {}
+fn cal_div() {}
