@@ -26,15 +26,15 @@ fn one_try_guess_game() -> () {
 }
 
 fn endless_guess_game() -> () {
-    let number_to_guess: u8 = rand::thread_rng().gen_range(1..=2);
+    let number_to_guess: u8 = rand::thread_rng().gen_range(1..=6);
     let mut input = String::new();
 
-    println!("I'm thinking of a number between 1 and 6");
+    println!("I'm thinking of a number between 1 and 3");
 
-    while input.trim() != number_to_guess.to_string() {
-        println!("input is {}", input);
+    while input.trim().to_string() != number_to_guess.to_string() {
+        input.clear();
+
         std::io::stdin().read_line(&mut input).expect("Failed to read line");
-        println!("Input is {}.ddd", input);
 
         if input.trim() == number_to_guess.to_string() {
             println!("You guessed it!")
