@@ -1,9 +1,9 @@
 use rand::{random, Rng};
 
 fn main() {
-    //one_try_guess_game();
-    endless_guess_game();
     calculator();
+    endless_guess_game();
+    one_try_guess_game();
 }
 
 fn tupulo() {
@@ -47,7 +47,8 @@ fn endless_guess_game() -> () {
 
 fn calculator() -> () {
     println!("Chose an operation, add, sub, mul, div");
-    let input = String::new();
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input).expect("Failed while chosing operation");
 
     if input.trim().to_string() == "add" {
         cal_add();
@@ -64,8 +65,14 @@ fn cal_add() {
     print!("Insert the first number: ");
     let mut input1 = String::new();
     let mut input2 = String::new();
-    std::io::stdin().read_line(&mut input1).expect("Failed to read line");
-    std::io::stdin().read_line(&mut input2).expect("Failed to read line");
+
+    std::io::stdin().read_line(&mut input1).expect("Failed to read line for input1");
+    std::io::stdin().read_line(&mut input2).expect("Failed to read line for input2");
+
+    let first_int = input1.trim().parse::<u8>().expect("Failed to parse the input 1 to u8");
+    let second_int = input2.trim().parse::<u8>().expect("Failed to parse the input 1 to u8");
+
+    println!("The result of sum is: {}", first_int + second_int);
 }
 fn cal_sub() {}
 fn cal_mul() {}
