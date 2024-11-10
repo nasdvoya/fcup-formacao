@@ -46,35 +46,46 @@ fn endless_guess_game() -> () {
 }
 
 fn calculator() -> () {
-    println!("Chose an operation, add, sub, mul, div");
+    println!("Ugh, math.");
     let mut input = String::new();
     std::io::stdin().read_line(&mut input).expect("Failed while chosing operation");
 
-    if input.trim().to_string() == "add" {
-        cal_add();
-    } else if input.trim().to_string() == "sub" {
-        cal_sub();
-    } else if input.trim().to_string() == "mul" {
-        cal_mul();
-    } else if input.trim().to_string() == "div" {
-        cal_div();
+    if input.trim().to_string().contains("+") {
+        cal_add(input);
+    } else if input.trim().to_string().contains("-") {
+        cal_sub(input);
+    } else if input.trim().to_string().contains("*") {
+        cal_mul(input);
+    } else if input.trim().to_string().contains("/") {
+        cal_div(input);
     }
 }
 
-fn cal_add() {
-    let mut input1 = String::new();
-    let mut input2 = String::new();
+fn cal_add(input: String) {
+    let foo: Vec<&str> = input.trim().split("+").collect();
+    let input1: u8 = foo[0].parse().expect("Invalid first operand");
+    let input2: u8 = foo[1].parse().expect("Invalid second operand");
 
-    println!("First input:");
-    std::io::stdin().read_line(&mut input1).expect("Failed to read line for input1");
-    println!("Second input:");
-    std::io::stdin().read_line(&mut input2).expect("Failed to read line for input2");
-
-    let first_int = input1.trim().parse::<u8>().expect("Failed to parse the input 1 to u8");
-    let second_int = input2.trim().parse::<u8>().expect("Failed to parse the input 1 to u8");
-
-    println!("The result of sum is: {}", first_int + second_int);
+    println!("The result of sum is: {}", input1 + input2);
 }
-fn cal_sub() {}
-fn cal_mul() {}
-fn cal_div() {}
+fn cal_sub(input: String) {
+    let foo: Vec<&str> = input.trim().split("-").collect();
+    let input1: u8 = foo[0].parse().expect("Invalid first operand");
+    let input2: u8 = foo[1].parse().expect("Invalid second operand");
+
+    println!("The result of sub is: {}", input1 - input2);
+}
+fn cal_mul(input: String) {
+    let foo: Vec<&str> = input.trim().split("*").collect();
+    let input1: u8 = foo[0].parse().expect("Invalid first operand");
+    let input2: u8 = foo[1].parse().expect("Invalid second operand");
+
+    println!("The result of mul is: {}", input1 * input2);
+}
+fn cal_div(input: String) {
+    let foo: Vec<&str> = input.trim().split("/").collect();
+    let input1: u8 = foo[0].parse().expect("Invalid first operand");
+    let input2: u8 = foo[1].parse().expect("Invalid second operand");
+
+    println!("The result of div is: {}", input1 % input2);
+}
