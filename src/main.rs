@@ -1,6 +1,7 @@
 use rand::{random, Rng};
 
 fn main() {
+    fibonacci();
     calculator();
     endless_guess_game();
     one_try_guess_game();
@@ -42,6 +43,23 @@ fn endless_guess_game() -> () {
         } else {
             println!("Wrong! Try again.")
         }
+    }
+}
+
+fn fibonacci() -> () {
+    println!("Input fibonacci limit: ");
+    let mut input = String::new();
+    let mut op1: u8 = 1;
+    let mut op2: u8 = 0;
+    let mut result: u8 = 0;
+    std::io::stdin().read_line(&mut input).expect("Failed to read input");
+    let limit: u8 = input.trim().parse().expect("Please enter a valid number");
+
+    while result < limit {
+        result = op2 + op1;
+        op1 = op2;
+        op2 = result;
+        println!("Fibonacci: {}", result);
     }
 }
 
