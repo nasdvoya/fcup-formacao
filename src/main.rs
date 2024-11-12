@@ -9,6 +9,10 @@ fn main() {
 }
 
 fn tupulo() {
+    // TODO: Check this
+    // let str: String = String::new();
+    // let str_ref: &String = &str;
+    // let str_2: String = *str_ref;
     let tuple = (500, 100);
     let (x, y) = tuple;
     println!("Isto vai destrui o tupulo, Valor {x} , {y}");
