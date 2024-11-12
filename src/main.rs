@@ -1,10 +1,11 @@
 use rand::{random, Rng};
 
 fn main() {
-    fibonacci();
-    calculator();
-    endless_guess_game();
-    one_try_guess_game();
+    let s = "Hello, world!";
+    // fibonacci();
+    // calculator();
+    // endless_guess_game();
+    // one_try_guess_game();
 }
 
 fn tupulo() {
