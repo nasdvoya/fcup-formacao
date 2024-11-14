@@ -1,13 +1,14 @@
 use rand::{random, Rng};
 
-fn main() {
-    let s = "Hello, world!";
-    // fibonacci();
-    // calculator();
-    // endless_guess_game();
-    // one_try_guess_game();
-}
+fn main() {}
 
+fn edit_string() -> () {
+    // Get input
+    let mut input: String = String::new();
+    std::io::stdin().read_line(&mut input).expect("Failed");
+    // Chose an option
+    // Do the operation
+}
 fn tupulo() {
     // TODO: Check this
     // let str: String = String::new();
