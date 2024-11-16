@@ -4,16 +4,33 @@ use rand::{random, Rng};
 
 fn main() {
     let mut option = String::new();
-    println!("Chose exercise: is_prime = 1");
+    println!(
+        "Chose exercise: is_prime = 1; edit_string = 2, array_mutation = 3, calculator = 4,
+        one_try_guess_game = 5, endless_guess_game=6, fibonacci=7"
+    );
     std::io::stdin().read_line(&mut option).expect("Pack on exercise choice");
     let option = option.trim();
     if option == "1" {
         is_prime();
     } else if option == "2" {
-        println!("Test");
-    } else {
         edit_string();
+    } else if option == "3" {
+        array_mutation();
+    } else if option == "4 " {
+        calculator();
+    } else if option == "5 " {
+        one_try_guess_game();
+    } else if option == "6 " {
+        endless_guess_game();
+    } else if option == "7 " {
+        fibonacci();
     }
+}
+
+struct Book {
+    title: String,
+    author: String,
+    borrowed: bool,
 }
 
 fn edit_string() -> () {
@@ -21,25 +38,29 @@ fn edit_string() -> () {
     println!("Please enter the text you want to work on:");
     let mut input: String = String::new();
     std::io::stdin().read_line(&mut input).expect("Failed");
-    println!("You have entered: {:?}", input.trim()); // Igual a: &input.trim() ???
-    println!("Just to make sure: {:?}", input.trim());
+    println!("You have entered: {:?}", input.trim());
 
     // Chose an option
     let mut action: String = String::new();
-    println!("Edit your input [del: char/word; upcase: char/word; locase: char/word;]: ");
     loop {
+        println!("Edit your input [del: char/word; upcase: char/word; locase: char/word;]: ");
         std::io::stdin().read_line(&mut action).expect("Weird");
         let pr_action: &str = action.trim();
         if pr_action.starts_with("del:") {
-            let foo: String = pr_action.replace("del:", "");
-            println!("Result: {:?}", input.replace(foo.as_str(), ""));
+            let to_delete: String = pr_action.replace("del:", "");
+            println!("Result: {:?}", input.replace(to_delete.as_str(), ""));
         } else if pr_action.starts_with("upcase:") {
+            println!("Result: {:?}", input.to_uppercase());
         } else if pr_action.starts_with("locase:") {
+            println!("Result: {:?}", input.to_lowercase());
+        } else {
+            return;
         }
-        std::io::stdin().read_line(&mut input).expect("Something broke");
+        input.clear();
+        action.clear();
+        println!("Please enter a NEW input the text you want to work on:");
+        std::io::stdin().read_line(&mut input).expect("Failed");
     }
-
-    // Do the operation
 }
 
 // fn tupulo() {
@@ -166,4 +187,31 @@ fn is_prime() -> bool {
 
     println!("{:?} is a prime number", number);
     true
+}
+
+fn array_mutation() {
+    // TODO: Aceder string como uma array?
+    let mut some_array: [i32; 6] = [1, 5, 6, 22, 54, 3];
+    println!("They array is {:?}", some_array);
+
+    for i in 0..some_array.len() {
+        // add, sub, div, mult
+        some_array[i] %= 2;
+    }
+    println!("Altered array is: {:?}", some_array);
+    for i in 0..some_array.len() {
+        // add, sub, div, mult
+        some_array[i] *= 2;
+    }
+    println!("Altered array is: {:?}", some_array);
+    for i in 0..some_array.len() {
+        // add, sub, div, mult
+        some_array[i] -= 2;
+    }
+    println!("Altered array is: {:?}", some_array);
+    for i in 0..some_array.len() {
+        // add, sub, div, mult
+        some_array[i] += 2;
+    }
+    println!("Altered array is: {:?}", some_array);
 }
