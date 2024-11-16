@@ -1,12 +1,10 @@
-use std::io::Write;
-
-use rand::{random, Rng};
+use rand::Rng;
 
 fn main() {
     let mut option = String::new();
     println!(
         "Chose exercise: is_prime = 1; edit_string = 2, array_mutation = 3, calculator = 4,
-        one_try_guess_game = 5, endless_guess_game=6, fibonacci=7"
+        one_try_guess_game = 5, endless_guess_game=6, fibonacci=7, library=8"
     );
     std::io::stdin().read_line(&mut option).expect("Pack on exercise choice");
     let option = option.trim();
@@ -24,13 +22,77 @@ fn main() {
         endless_guess_game();
     } else if option == "7 " {
         fibonacci();
+    } else if option == "8" {
+        let mut lib = Library::new();
+        println!("Current lib state: {:?}", lib);
+        lib.remove_book();
+        println!("Current lib state: {:?}", lib);
+        let some_book = Book {
+            title: String::from("New book"),
+            author: String::from("New author"),
+            borrowed: false,
+        };
+        lib.add_book(some_book);
+        println!("Current lib state: {:?}", lib);
+        lib.borrow_book("New book");
+        println!("Current lib state: {:?}", lib);
     }
 }
 
+#[derive(Eq, PartialEq, Debug)]
 struct Book {
     title: String,
     author: String,
     borrowed: bool,
+}
+
+// TODO: What is debug under the hood
+#[derive(Debug)]
+struct Library {
+    books: Vec<Book>,
+}
+
+impl Library {
+    fn new() -> Self {
+        let mut books = Vec::new();
+        books.push(Book {
+            title: String::from("Book1"),
+            author: String::from("Author1"),
+            borrowed: false,
+        });
+        books.push(Book {
+            title: String::from("Book2"),
+            author: String::from("Author2"),
+            borrowed: false,
+        });
+        books.push(Book {
+            title: String::from("Book3"),
+            author: String::from("Author3"),
+            borrowed: false,
+        });
+        Library { books }
+    }
+    fn add_book(&mut self, book: Book) {
+        self.books.push(book);
+    }
+    fn remove_book(&mut self) {
+        // TODO: Isto?
+        self.books.pop();
+    }
+    fn borrow_book(&mut self, title: &str) {
+        for b in &mut self.books {
+            if b.title == title {
+                b.borrowed = true;
+            }
+        }
+    }
+    fn return_book(&mut self, book: Book) {
+        for b in 0..self.books.len() {
+            if book == self.books[b] {
+                self.books[b].borrowed = false;
+            }
+        }
+    }
 }
 
 fn edit_string() -> () {
