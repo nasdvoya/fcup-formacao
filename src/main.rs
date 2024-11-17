@@ -4,7 +4,7 @@ fn main() {
     let mut option = String::new();
     println!(
         "Chose exercise: is_prime = 1; edit_string = 2, array_mutation = 3, calculator = 4,
-        one_try_guess_game = 5, endless_guess_game=6, fibonacci=7, library=8"
+        one_try_guess_game = 5, endless_guess_game=6, fibonacci=7, library=8, vigenere=9"
     );
     std::io::stdin().read_line(&mut option).expect("Pack on exercise choice");
     let option = option.trim();
@@ -38,8 +38,11 @@ fn main() {
         println!("Current lib state: {:?}", lib);
         lib.return_book("New book");
         println!("Current lib state: {:?}", lib);
+    } else if option == "9" {
     }
 }
+
+fn vigenere() {}
 
 #[derive(Eq, PartialEq, Debug)]
 struct Book {
@@ -82,18 +85,18 @@ impl Library {
         self.books.pop();
     }
     fn borrow_book(&mut self, title: &str) {
-        for b in &mut self.books {
-            if b.title == title {
-                b.borrowed = true;
+        for book in &mut self.books {
+            if book.title == title {
+                book.borrowed = true;
             } else {
                 println!("Book not found {}", title);
             }
         }
     }
     fn return_book(&mut self, title: &str) {
-        for b in &mut self.books {
-            if b.title == title {
-                b.borrowed = false;
+        for book in &mut self.books {
+            if book.title == title {
+                book.borrowed = false;
             } else {
                 println!("Book not found {}", title);
             }
