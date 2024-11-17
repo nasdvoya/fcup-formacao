@@ -36,6 +36,8 @@ fn main() {
         println!("Current lib state: {:?}", lib);
         lib.borrow_book("New book");
         println!("Current lib state: {:?}", lib);
+        lib.return_book("New book");
+        println!("Current lib state: {:?}", lib);
     }
 }
 
@@ -83,13 +85,17 @@ impl Library {
         for b in &mut self.books {
             if b.title == title {
                 b.borrowed = true;
+            } else {
+                println!("Book not found {}", title);
             }
         }
     }
-    fn return_book(&mut self, book: Book) {
-        for b in 0..self.books.len() {
-            if book == self.books[b] {
-                self.books[b].borrowed = false;
+    fn return_book(&mut self, title: &str) {
+        for b in &mut self.books {
+            if b.title == title {
+                b.borrowed = false;
+            } else {
+                println!("Book not found {}", title);
             }
         }
     }
