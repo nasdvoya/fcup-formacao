@@ -1,3 +1,5 @@
+use std::ops::Index;
+
 use rand::Rng;
 
 fn main() {
@@ -39,10 +41,24 @@ fn main() {
         lib.return_book("New book");
         println!("Current lib state: {:?}", lib);
     } else if option == "9" {
+        vigenere("", "");
     }
 }
 
-fn vigenere() {}
+fn vigenere(key: &str, input: &str) {
+    let alphabet: Vec<char> = ('a'..'z').collect();
+    // map the positions of key
+    for (input_i, input_char) in input.chars().enumerate() {
+        // text -> iteration number and "letter" to substitute
+        for (key_i, key_char) in key.chars().enumerate() {
+            if (key_i == input_i) {}
+        }
+
+        for c in &alphabet {}
+    }
+    // use the position of key to shift
+    println!("Alpha: {:?}", alphabet);
+}
 
 #[derive(Eq, PartialEq, Debug)]
 struct Book {
