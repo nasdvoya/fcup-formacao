@@ -3,6 +3,12 @@ use std::ops::Index;
 use rand::Rng;
 
 fn main() {
+    let test_ = 10;
+    let test_ref = &test_;
+    let test_2 = *test_ref;
+    println!("sdss {:?}", test_ref);
+    println!("sdss {:?}", test_2);
+    println!("sdss {:?}", test_ref);
     let mut option = String::new();
     println!(
         "Chose exercise: is_prime = 1; edit_string = 2, array_mutation = 3, calculator = 4,
@@ -45,16 +51,19 @@ fn main() {
     }
 }
 
+// This is insane
 fn vigenere(key: &str, input: &str) {
     let alphabet: Vec<char> = ('a'..'z').collect();
     // map the positions of key
     for (input_i, input_char) in input.chars().enumerate() {
         // text -> iteration number and "letter" to substitute
         for (key_i, key_char) in key.chars().enumerate() {
-            if (key_i == input_i) {}
+            if key_i == input_i {
+                for (alpha_i, alpha_char) in alphabet.iter().enumerate() {
+                    if key_char == alpha_char.clone() {}
+                }
+            }
         }
-
-        for c in &alphabet {}
     }
     // use the position of key to shift
     println!("Alpha: {:?}", alphabet);
