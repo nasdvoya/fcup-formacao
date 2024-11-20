@@ -51,6 +51,15 @@ fn main() {
     }
 }
 
+fn enums() {
+    // sum types
+    // sao "tagged unions"
+    // Obrigatoriamente ter o tamanho do maior membro do union
+    // Podem ter blocos de implementação, funcoes associadas e metodos
+    // "_" no ultimo branch do match // WARNING: Evitar
+    // valor so eh consumido quando atribuimos valor no match
+}
+
 // This is insane
 fn vigenere(key: &str, input: &str) {
     let alphabet: Vec<char> = ('a'..'z').collect();
