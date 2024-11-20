@@ -63,11 +63,17 @@ fn enums() {
 // This is insane
 fn vigenere(key: &str, input: &str) {
     let alphabet: Vec<char> = ('a'..'z').collect();
-    // map the positions of key
-    for (input_i, input_char) in input.chars().enumerate() {
-        // text -> iteration number and "letter" to substitute
+    let password_collection: Vec<char> = key.chars().collect();
+    let mut cipher: Vec<char> = Vec::new();
+    // iterate over input
+    for (iteration, input_char) in input.chars().enumerate() {
+        let cipher_char: &char = &password_collection[iteration];
+        if let Some(index) = alphabet.iter().position(|&c| c == *cipher_char) {
+            cipher.push(alphabet[1]);
+            // gives number of positions to move
+        }
         for (key_i, key_char) in key.chars().enumerate() {
-            if key_i == input_i {
+            if key_i == iteration {
                 for (alpha_i, alpha_char) in alphabet.iter().enumerate() {
                     if key_char == alpha_char.clone() {}
                 }
@@ -76,6 +82,10 @@ fn vigenere(key: &str, input: &str) {
     }
     // use the position of key to shift
     println!("Alpha: {:?}", alphabet);
+}
+
+fn new_vigenere(key: &str, input: &str) {
+    let alphabet: Vec<char> = ('a'..'z').collect();
 }
 
 #[derive(Eq, PartialEq, Debug)]
