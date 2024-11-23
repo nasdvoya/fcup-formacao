@@ -1,6 +1,6 @@
-use mercearia::Product;
 use rand::Rng;
-mod mercearia;
+use shop::Product;
+mod shop;
 
 fn main() {
     let mut product = Product::new(String::from("1223"), String::from(""), 33, 2.45, 1);
