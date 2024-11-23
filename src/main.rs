@@ -1,56 +1,15 @@
-use std::ops::Index;
-
+use mercearia::Product;
 use rand::Rng;
+mod mercearia;
 
 fn main() {
-    let test_ = 10;
-    let test_ref = &test_;
-    let test_2 = *test_ref;
-    println!("sdss {:?}", test_ref);
-    println!("sdss {:?}", test_2);
-    println!("sdss {:?}", test_ref);
-    let mut option = String::new();
-    println!(
-        "Chose exercise: is_prime = 1; edit_string = 2, array_mutation = 3, calculator = 4,
-        one_try_guess_game = 5, endless_guess_game=6, fibonacci=7, library=8, vigenere=9"
-    );
-    std::io::stdin().read_line(&mut option).expect("Pack on exercise choice");
-    let option = option.trim();
-    if option == "1" {
-        is_prime();
-    } else if option == "2" {
-        edit_string();
-    } else if option == "3" {
-        array_mutation();
-    } else if option == "4 " {
-        calculator();
-    } else if option == "5 " {
-        one_try_guess_game();
-    } else if option == "6 " {
-        endless_guess_game();
-    } else if option == "7 " {
-        fibonacci();
-    } else if option == "8" {
-        let mut lib = Library::new();
-        println!("Current lib state: {:?}", lib);
-        lib.remove_book();
-        println!("Current lib state: {:?}", lib);
-        let some_book = Book {
-            title: String::from("New book"),
-            author: String::from("New author"),
-            borrowed: false,
-        };
-        lib.add_book(some_book);
-        println!("Current lib state: {:?}", lib);
-        lib.borrow_book("New book");
-        println!("Current lib state: {:?}", lib);
-        lib.return_book("New book");
-        println!("Current lib state: {:?}", lib);
-    } else if option == "9" {
-        vigenere("", "");
-    }
+    let mut product = Product::new(String::from("1223"), String::from(""), 33, 2.45, 1);
+    println!("Here is a product {:?}", product);
+    product.change_price(3.22);
+    println!("Here is a product again {:?}", product);
+    product.update_stock(3);
+    println!("Product again {:?}", product);
 }
-
 fn enums() {
     // sum types
     // sao "tagged unions"
@@ -60,7 +19,19 @@ fn enums() {
     // valor so eh consumido quando atribuimos valor no match
 }
 
-// This is insane
+fn test(key: &str, text: &str) -> String {
+    let key_bytes = key.as_bytes();
+    let mut encrypted = String::new();
+
+    for (i, &byte) in text.as_bytes().iter().enumerate() {
+        let key_byte: u8 = key_bytes[i % key_bytes.len()] - b'a';
+        let encrypted_byte = ((byte - b'a' + key_byte) % 26) + b'a';
+        encrypted.push(encrypted_byte as char);
+    }
+
+    encrypted
+}
+
 fn vigenere(key: &str, input: &str) {
     let alphabet: Vec<char> = ('a'..'z').collect();
     let password_collection: Vec<char> = key.chars().collect();
