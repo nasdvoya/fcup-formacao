@@ -3,11 +3,17 @@ pub struct Shop {
     rows: Vec<Row>,
 }
 
-pub fn StoreExample() -> () {
+pub fn exercise_store() {
     let mut ashop = Shop::new();
-    println!("This is a shop {:?}", ashop);
-    let product = Product::new(String::from("ID234"), String::from("Pepsi"), 33, 2.45, 200);
-    ashop.add_product(product, 2, "Soda");
+    println!("Shop: {:#?}", ashop);
+    let mut soda_product = Product::new(String::from("ID234"), String::from("Pepsi"), 33, 2.45, 200);
+    soda_product.change_price(2.55);
+    ashop.add_product(soda_product, 2, "Soda");
+    println!("Add product: {:#?}", ashop);
+    ashop.restock(String::from("Pepsi"), 100);
+    println!("Restock: {:#?}", ashop);
+    ashop.move_product(1, "Sweets", String::from("ID234"));
+    println!("Move: {:#?}", ashop);
 }
 
 impl Shop {
@@ -47,7 +53,10 @@ impl Shop {
         let mut product_to_move: Option<Product> = None;
         for row in &mut self.rows {
             for zone in &mut row.zones {
+                println!("a222");
+                println!("{}a", id_to_move);
                 if let Some(pos) = zone.products.iter().position(|p| p.id == id_to_move) {
+                    println!("222");
                     product_to_move = Some(zone.products.remove(pos));
                     break;
                 }
@@ -61,8 +70,10 @@ impl Shop {
                 if row.number == to_row {
                     if let Some(zone) = row.zones.iter_mut().find(|z| z.name == to_zone) {
                         zone.products.push(product);
-                        println!("Product moved");
+                        println!("Product moved.");
                         return;
+                    } else {
+                        println!("Product not moved.")
                     }
                 }
             }
@@ -120,7 +131,79 @@ impl Product {
     pub fn change_price(&mut self, new_price: f64) {
         self.price = new_price;
     }
-    pub fn update_stock(&mut self, new_stock: u16) {
-        self.stock = new_stock;
+}
+
+//////////// Library ////////////
+
+pub fn exercise_library() {
+    let mut library = Library::new();
+    library.add_book(Book::new(String::from("Book1"), String::from("Author1"), false));
+    library.borrow_book("Book1");
+    library.return_book("Book1");
+    library.remove_book();
+}
+
+#[derive(Eq, PartialEq, Debug)]
+struct Book {
+    title: String,
+    author: String,
+    borrowed: bool,
+}
+
+impl Book {
+    fn new(title: String, author: String, borrowed: bool) -> Self {
+        Self { title, author, borrowed }
+    }
+}
+
+#[derive(Debug)]
+struct Library {
+    books: Vec<Book>,
+}
+
+impl Library {
+    fn new() -> Self {
+        let mut books = Vec::new();
+        books.push(Book {
+            title: String::from("Book1"),
+            author: String::from("Author1"),
+            borrowed: false,
+        });
+        books.push(Book {
+            title: String::from("Book2"),
+            author: String::from("Author2"),
+            borrowed: false,
+        });
+        books.push(Book {
+            title: String::from("Book3"),
+            author: String::from("Author3"),
+            borrowed: false,
+        });
+        Library { books }
+    }
+    fn add_book(&mut self, book: Book) {
+        self.books.push(book);
+    }
+    fn remove_book(&mut self) {
+        // TODO: Isto?
+        self.books.pop();
+    }
+    fn borrow_book(&mut self, title: &str) {
+        for book in &mut self.books {
+            if book.title == title {
+                book.borrowed = true;
+            } else {
+                println!("Book not found {}", title);
+            }
+        }
+    }
+    fn return_book(&mut self, title: &str) {
+        for book in &mut self.books {
+            if book.title == title {
+                book.borrowed = false;
+            } else {
+                println!("Book not found {}", title);
+            }
+        }
     }
 }
