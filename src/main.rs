@@ -1,14 +1,8 @@
 use rand::Rng;
-use shop::Product;
 mod shop;
 
 fn main() {
-    let mut product = Product::new(String::from("1223"), String::from(""), 33, 2.45, 1);
-    println!("Here is a product {:?}", product);
-    product.change_price(3.22);
-    println!("Here is a product again {:?}", product);
-    product.update_stock(3);
-    println!("Product again {:?}", product);
+    shop::StoreExample()
 }
 fn enums() {
     // sum types

@@ -1,15 +1,48 @@
+#[derive(Debug)]
 pub struct Shop {
     rows: Vec<Row>,
 }
+
+pub fn StoreExample() -> () {
+    let mut ashop = Shop::new();
+    println!("This is a shop {:?}", ashop);
+    let product = Product::new(String::from("ID234"), String::from("Pepsi"), 33, 2.45, 200);
+    ashop.add_product(product, 2, "Soda");
+}
+
 impl Shop {
     pub fn new() -> Self {
         let mut rows = Vec::new();
-        rows.push(Row::new(1, vec![Zones::new("Salgados"), Zones::new("Doces"), Zones::new("Bebidas")]));
-        rows.push(Row::new(2, vec![Zones::new("Sumos"), Zones::new("Aguas"), Zones::new("Alcol")]));
-        rows.push(Row::new(3, vec![Zones::new("Iogurtes"), Zones::new("Manteigas"), Zones::new("Saladas")]));
+        rows.push(Row::new(1, vec![Zone::new("Salty"), Zone::new("Sweets"), Zone::new("Drinks")]));
+        rows.push(Row::new(2, vec![Zone::new("Soda"), Zone::new("Water"), Zone::new("Alcohol")]));
+        rows.push(Row::new(3, vec![Zone::new("Yogurt"), Zone::new("Butter"), Zone::new("Salad")]));
 
         Self { rows }
     }
+
+    pub fn restock(&mut self, product: String, amount: u16) {
+        for row in &mut self.rows {
+            for zone in &mut row.zones {
+                if let Some(product) = zone.products.iter_mut().find(|p| p.name == product) {
+                    product.stock += amount;
+                    return;
+                }
+            }
+        }
+    }
+
+    pub fn add_product(&mut self, new_product: Product, add_row: u8, add_zone: &str) {
+        if let Some(row) = self.rows.iter_mut().find(|r| r.number == add_row) {
+            if let Some(zone) = row.zones.iter_mut().find(|z| z.name == add_zone) {
+                zone.products.push(new_product);
+            } else {
+                println!("Adding product to store: The zone:{} was not found", add_zone);
+            }
+        } else {
+            println!("Adding product to store: The row:{} was not found", add_row);
+        }
+    }
+
     pub fn move_product(&mut self, to_row: u8, to_zone: &str, id_to_move: String) {
         let mut product_to_move: Option<Product> = None;
         for row in &mut self.rows {
@@ -39,26 +72,28 @@ impl Shop {
     }
 }
 
+#[derive(Debug)]
 pub struct Row {
     number: u8,
-    zones: Vec<Zones>,
+    zones: Vec<Zone>,
 }
 
 impl Row {
-    fn new(number: u8, zones: Vec<Zones>) -> Self {
+    fn new(number: u8, zones: Vec<Zone>) -> Self {
         Row { number, zones }
     }
 }
 
-pub struct Zones {
+#[derive(Debug)]
+pub struct Zone {
     name: &'static str,
     products: Vec<Product>,
 }
 
-impl Zones {
+impl Zone {
     // TODO: Review life cycle
     fn new(name: &'static str) -> Self {
-        Zones { name, products: Vec::new() }
+        Zone { name, products: Vec::new() }
     }
 }
 
