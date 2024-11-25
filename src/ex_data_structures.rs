@@ -25,32 +25,5 @@ struct Library {
 }
 
 impl Library {
-    fn new() -> Self {
-        Self {}
-    }
-    // fn add_book(&mut self, book: Book) {
-    //     self.books.push(book);
-    // }
-    // fn remove_book(&mut self) {
-    //     let mut dd: HashMap<Book, String> = HashMap::new();
-    //     self.books.pop();
-    // }
-    // fn borrow_book(&mut self, title: &str) {
-    //     for book in &mut self.books {
-    //         if book.title == title {
-    //             book.borrowed = true;
-    //         } else {
-    //             println!("Book not found {}", title);
-    //         }
-    //     }
-    // }
-    // fn return_book(&mut self, title: &str) {
-    //     for book in &mut self.books {
-    //         if book.title == title {
-    //             book.borrowed = false;
-    //         } else {
-    //             println!("Book not found {}", title);
-    //         }
-    //     }
-    // }
+    fn new() {}
 }
