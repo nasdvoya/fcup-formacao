@@ -43,7 +43,7 @@ impl Book {
 
 #[derive(Debug)]
 struct Library(HashMap<&Isbn, Book>);
-
+// TODO: Reference on hashmap?
 impl Library {
     fn new() -> Self {
         let mut books: HashMap<Isbn, Book> = HashMap::new();
