@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 pub fn exercise_library() {
     let library = Library::new();
+    library.search_intersection_keywords(vec!["rust".to_string()]);
     println!("This is a library {:#?}", library);
 }
 
@@ -43,6 +44,7 @@ impl Book {
 
 #[derive(Debug)]
 struct Library(HashMap<Isbn, Book>);
+
 // TODO: Reference on hashmap?
 impl Library {
     fn new() -> Self {
@@ -53,7 +55,7 @@ impl Library {
             book1_isbn.clone(),
             "The Rust Programming Language".to_string(),
             "Steve Klabnik and Carol Nichols".to_string(),
-            HashSet::from(["rust".to_string(), "programming".to_string()]),
+            HashSet::from(["rust".to_string(), "steve".to_string()]),
             false,
         );
         let book2_isbn = Isbn::new();
@@ -69,8 +71,17 @@ impl Library {
         Self(books)
     }
 
-    fn search_intersection_keywords(&self, keys: Vec<String> ) -> Book {
-        var dd = &self.0.values();
-        todo!()
+    // And
+    fn search_intersection_keywords(&self, keys: Vec<String>) /* -> Vec<&Book> */
+    {
+        let books = self.0.values().filter(|book| keys.iter().all(|key| book.keywords.contains(key)));
+        // for bk in books {}
+        println!("{:?}", books);
+        // books.collect()
+    }
+
+    // Or
+    fn search_union_keywords(&self, keys: Vec<String>) -> Vec<Book> {
+        todo!();
     }
 }
