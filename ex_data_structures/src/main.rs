@@ -1,10 +1,13 @@
 use std::collections::{HashMap, HashSet};
-
 use uuid::Uuid;
 
 // Livraria 2.0: Augmente a livraria feita anteriormente com estruturas de dados para eficientemente encontrar um livro pelo seu titulo e encontrar os livros escritos por um autor. Adicionar ISBN e palavras chave a cada livro. Introduzir procura por palavras chave eficiente com a capacidade de fazer procura por interseção de palavras chave ou união de palavras chave.
 
-pub fn exercise_library() {
+fn main() {
+    exercise_library();
+}
+
+fn exercise_library() {
     let mut library = Library::new();
     library.search_intersection_keywords(vec!["test1".to_string(), "test2".to_string()]);
     library.search_union_keywords(vec!["test1".to_string(), "test2".to_string()]);

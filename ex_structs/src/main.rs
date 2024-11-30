@@ -1,3 +1,7 @@
+fn main() {
+    exercise_store();
+}
+
 #[derive(Debug)]
 pub struct Shop {
     rows: Vec<Row>,

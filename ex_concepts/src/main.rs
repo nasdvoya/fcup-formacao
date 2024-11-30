@@ -1,5 +1,9 @@
 use rand::Rng;
 
+fn main() {
+    exercise_concepts();
+}
+
 pub fn exercise_concepts() {
     one_try_guess_game();
     endless_guess_game();

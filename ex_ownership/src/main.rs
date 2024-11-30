@@ -1,4 +1,8 @@
-pub fn exercise_ownership() {
+fn main() {
+    exercise_ownership();
+}
+
+fn exercise_ownership() {
     edit_string();
     array_mutation();
 
@@ -40,7 +44,6 @@ fn edit_string() -> () {
 }
 
 fn array_mutation() {
-    // TODO: Aceder string como uma array?
     let mut some_array: [i32; 6] = [1, 5, 6, 22, 54, 3];
     println!("They array is {:?}", some_array);
 
@@ -61,7 +64,7 @@ fn array_mutation() {
     }
     println!("Altered array is: {:?}", some_array);
 }
-// TODO: Something broke
+
 fn vigenere(key: &str, text: &str) -> String {
     let key_bytes = key.as_bytes();
     let mut encrypted = String::new();
