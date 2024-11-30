@@ -5,6 +5,7 @@ mod ex_structs;
 
 fn main() {
     let mut input = String::new();
+    ex_data_structures::exercise_library();
     std::io::stdin().read_line(&mut input).expect("this is not a exception");
     match input.trim() {
         "concepts" => ex_concepts::exercise_concepts(),

@@ -5,9 +5,27 @@ use uuid::Uuid;
 // Livraria 2.0: Augmente a livraria feita anteriormente com estruturas de dados para eficientemente encontrar um livro pelo seu titulo e encontrar os livros escritos por um autor. Adicionar ISBN e palavras chave a cada livro. Introduzir procura por palavras chave eficiente com a capacidade de fazer procura por interseção de palavras chave ou união de palavras chave.
 
 pub fn exercise_library() {
-    let library = Library::new();
-    library.search_intersection_keywords(vec!["rust".to_string()]);
-    println!("This is a library {:#?}", library);
+    let mut library = Library::new();
+    library.search_intersection_keywords(vec!["test1".to_string(), "test2".to_string()]);
+    library.search_union_keywords(vec!["test1".to_string(), "test2".to_string()]);
+
+    library.find_books_by_author("Klabnik");
+    library.find_book_by_title("The Rust Programming Language");
+
+    let new_book = Book::new(
+        Isbn::new(),
+        "Some book".to_string(),
+        "John Doe".to_string(),
+        HashSet::from(["something".to_string(), "learning".to_string()]),
+        false,
+    );
+    library.add_book(new_book);
+    println!("{:#?}", library);
+    library.borrow_book("Some book");
+    println!("{:#?}", library);
+    library.return_book("Some book");
+    println!("{:#?}", library);
+    library.remove_book("Some book");
 }
 
 // TODO: Why did I need to add Hash here?
@@ -55,7 +73,7 @@ impl Library {
             book1_isbn.clone(),
             "The Rust Programming Language".to_string(),
             "Steve Klabnik and Carol Nichols".to_string(),
-            HashSet::from(["rust".to_string(), "steve".to_string()]),
+            HashSet::from(["test1".to_string(), "test2".to_string()]),
             false,
         );
         let book2_isbn = Isbn::new();
@@ -63,7 +81,7 @@ impl Library {
             book2_isbn.clone(),
             "Programming".to_string(),
             "Klabnik".to_string(),
-            HashSet::from(["rust".to_string(), "programming".to_string()]),
+            HashSet::from(["test3".to_string(), "test4".to_string()]),
             false,
         );
         books.insert(book1_isbn, book1);
@@ -71,17 +89,110 @@ impl Library {
         Self(books)
     }
 
-    // And
-    fn search_intersection_keywords(&self, keys: Vec<String>) /* -> Vec<&Book> */
-    {
-        let books = self.0.values().filter(|book| keys.iter().all(|key| book.keywords.contains(key)));
-        // for bk in books {}
-        println!("{:?}", books);
-        // books.collect()
+    fn search_intersection_keywords(&self, keys: Vec<String>) {
+        let match_books: Vec<&Book> = self
+            .0
+            .values()
+            .filter(|book| keys.iter().all(|key| book.keywords.contains(key)))
+            .collect();
+
+        if match_books.is_empty() {
+            println!("No books contain specified keywords: {:?}", keys);
+        } else {
+            for book in match_books {
+                println!("{:?}", book);
+            }
+        }
     }
 
-    // Or
-    fn search_union_keywords(&self, keys: Vec<String>) -> Vec<Book> {
-        todo!();
+    fn search_union_keywords(&self, keys: Vec<String>) {
+        let match_books: Vec<&Book> = self
+            .0
+            .values()
+            .filter(|book| keys.iter().any(|key| book.keywords.contains(key)))
+            .collect();
+
+        if match_books.is_empty() {
+            println!("No books contain specified keywords: {:?}", keys);
+        } else {
+            for book in match_books {
+                println!("{:?}", book);
+            }
+        }
+    }
+
+    fn find_books_by_author(&self, author: &str) {
+        let books_by_author: Vec<&Book> = self.0.values().filter(|book| book.author == author).collect();
+
+        if books_by_author.is_empty() {
+            println!("No books found by author: {}", author);
+        } else {
+            println!("Books by author '{}':", author);
+            for book in books_by_author {
+                println!("{:?}", book);
+            }
+        }
+    }
+
+    fn find_book_by_title(&self, title: &str) {
+        let book = self.0.values().find(|book| book.title == title);
+
+        match book {
+            Some(book) => println!("Found book by title '{}':\n{:?}", title, book),
+            None => println!("No book found with title: {}", title),
+        }
+    }
+
+    fn borrow_book(&mut self, title: &str) {
+        let book = self.0.values_mut().find(|book| book.title == title);
+
+        match book {
+            Some(book) => {
+                if book.borrowed {
+                    println!("The book '{}' is already borrowed.", title);
+                } else {
+                    book.borrowed = true;
+                    println!("You borrowed the book '{}'.", title);
+                }
+            }
+            None => println!("Book not found: {}", title),
+        }
+    }
+
+    fn return_book(&mut self, title: &str) {
+        let book = self.0.values_mut().find(|book| book.title == title);
+
+        match book {
+            Some(book) => {
+                if !book.borrowed {
+                    println!("The book '{}' was not borrowed.", title);
+                } else {
+                    book.borrowed = false;
+                    println!("You returned the book '{}'.", title);
+                }
+            }
+            None => println!("Book not found: {}", title),
+        }
+    }
+
+    fn add_book(&mut self, book: Book) {
+        if self.0.contains_key(&book.isbn) {
+            println!("Book with ISBN {} already exists.", book.isbn.0);
+        } else {
+            self.0.insert(book.isbn.clone(), book);
+            println!("Book added successfully.");
+        }
+    }
+
+    fn remove_book(&mut self, title: &str) {
+        let book_key = self.0.iter().find(|(_, book)| book.title == title).map(|(isbn, _)| isbn.clone());
+
+        match book_key {
+            Some(isbn) => {
+                self.0.remove(&isbn);
+                println!("The book '{}' was removed from the library.", title);
+            }
+            None => println!("Book not found: {}", title),
+        }
     }
 }
