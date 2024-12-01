@@ -1,39 +1,92 @@
-use std::time::SystemTime;
+use std::{ops::Index, time::SystemTime};
 
-fn main() {}
+fn main() {
+    test_function()
+}
 
+fn test_function() {
+    let _foo: Shelf<SomeItem> = Shelf::new(10);
+    println!("This test shelf {:#?}", _foo);
+    let _bar: Warehouse<SomeItem> = Warehouse::new(2, 3, 1);
+    println!("This test warehouse {:#?}", _bar);
+}
+
+#[derive(Debug)]
 struct Warehouse<T: WarehouseItem> {
-    Rows: Vec<Row<T>>,
+    rows: Vec<Row<T>>,
 }
 
-impl<T: WarehouseItem> Warehouse<T> {
-    fn new(rows: u16, shelves: u16, zones: u16) -> Self {
-        todo!()
-    }
-}
+impl<T: WarehouseItem> Warehouse<T> {}
 
+#[derive(Debug)]
 struct Row<T: WarehouseItem> {
-    Shelfs: Vec<Shelf<T>>,
+    shelves: Vec<Shelf<T>>,
 }
 
-struct Shelf<T: WarehouseItem> {
-    Zones: Vec<Zone<T>>,
-}
-
-impl<T: WarehouseItem> Shelf<T> {
-    fn new(amount: u16) -> Self {
-        // TODO: Push the shelves
-        todo!()
+impl<T: WarehouseItem> Row<T> {
+    fn new(shelves: usize, zones: usize) -> Self {
+        let shelves: Vec<Shelf<T>> = (0..shelves).map(|_| Shelf::new(zones)).collect();
+        Self { shelves }
     }
 }
 
-struct Zone<T: WarehouseItem> {
-    item: Option<T>,
+#[derive(Debug)]
+struct Shelf<'a, T: WarehouseItem> {
+    levels: Vec<Level<'a, T>>,
 }
-impl<T: WarehouseItem> Zone<T> {
-    fn new(item: Option<T>) -> Self {
-        Self { item }
+
+impl<'a, T: WarehouseItem> Shelf<'a, T> {
+    fn new(levels: usize, zones: usize) -> Self {
+        let levels = (0..zones).map(|_| Level::new(zones)).collect();
+        Self { levels }
     }
+}
+
+#[derive(Debug)]
+struct Level<'a, T: WarehouseItem> {
+    zones: Vec<Zone<'a, T>>,
+}
+
+impl<'a, T: WarehouseItem> Level<'a, T> {
+    fn new(zones: usize) -> Self {
+        let zones = (0..zones).map(|_| Zone::new_empty()).collect();
+        Self { zones }
+    }
+}
+
+#[derive(Debug)]
+struct Zone<'a, T: WarehouseItem> {
+    zone_type: ZoneType<'a, T>,
+}
+
+impl<'a, T: WarehouseItem> Zone<'a, T> {
+    fn new_empty() -> Self {
+        Self { zone_type: ZoneType::Empty }
+    }
+    fn new_normal(item: T) -> Self {
+        Self {
+            zone_type: ZoneType::NormalItem(item),
+        }
+    }
+    fn new_oversized(item: &'a T) -> Self {
+        Self {
+            zone_type: ZoneType::OversizedItem(item),
+        }
+    }
+}
+
+#[derive(Debug)]
+enum ZoneType<'a, T: WarehouseItem> {
+    Empty,
+    NormalItem(T),
+    OversizedItem(&'a T),
+}
+
+#[derive(Debug)]
+enum Quality {
+    Fragile { expiration_date: String, storage_maxlevel: String },
+    Oversized { size: u16 },
+    Normal,
 }
 
 trait WarehouseItem {
@@ -44,7 +97,8 @@ trait WarehouseItem {
     fn timestamp(&self) -> SystemTime;
 }
 
-struct SomeTime {
+#[derive(Debug)]
+struct SomeItem {
     id: u64,
     name: String,
     quality: Quality,
@@ -52,7 +106,7 @@ struct SomeTime {
     timestamp: SystemTime,
 }
 
-impl WarehouseItem for SomeTime {
+impl WarehouseItem for SomeItem {
     fn id(&self) -> u64 {
         self.id
     }
@@ -70,8 +124,57 @@ impl WarehouseItem for SomeTime {
     }
 }
 
-enum Quality {
-    Fragile { expiration_date: String, storage_maxlevel: String },
-    Oversized { size: u16 },
-    Normal,
-}
+// impl<T: WarehouseItem> Warehouse<T> {
+//     fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
+//         let rows: Vec<Row<T>> = (0..rows).map(|_| Row::new(shelves, zones)).collect();
+//         Self { rows }
+//     }
+//
+//     // methods
+//     //
+//     fn item_allocation(&mut self, item: T) -> (usize, usize, usize) {
+//         match item.quality() {
+//             Quality::Normal => {
+//                 for (row_index, row) in self.rows.iter_mut().enumerate() {
+//                     for (shelf_index, shelf) in row.shelves.iter_mut().enumerate() {
+//                         for (zone_index, zone) in shelf.zones.iter_mut().enumerate() {
+//                             if let None = &zone.item {
+//                                 zone.item = Some(item);
+//                                 return (row_index, shelf_index, zone_index);
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//             Quality::Fragile {
+//                 expiration_date,
+//                 storage_maxlevel,
+//             } => {}
+//             Quality::Oversized { size } => {}
+//         }
+//         todo!()
+//     }
+//
+//     fn item_placement(&mut self, item: T) {
+//         match item.quality() {
+//             Quality::Fragile {
+//                 expiration_date,
+//                 storage_maxlevel,
+//             } => todo!(),
+//             Quality::Oversized { size } => todo!(),
+//             Quality::Normal => {
+//                 for (row_index, row) in self.rows.iter_mut().enumerate() {
+//                     for (shelf_index, shelf) in row.shelves.iter_mut().enumerate() {
+//                         for (zone_index, zone) in shelf.zones.iter_mut().enumerate() {
+//                             if let None = &zone.item {
+//                                 zone.item = Some(item);
+//                                 return;
+//                             } else {
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
