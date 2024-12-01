@@ -7,7 +7,7 @@ struct Warehouse<T: WarehouseItem> {
 }
 
 impl<T: WarehouseItem> Warehouse<T> {
-    fn new() -> Self {
+    fn new(rows: u16, shelves: u16, zones: u16) -> Self {
         todo!()
     }
 }
@@ -20,8 +20,20 @@ struct Shelf<T: WarehouseItem> {
     Zones: Vec<Zone<T>>,
 }
 
+impl<T: WarehouseItem> Shelf<T> {
+    fn new(amount: u16) -> Self {
+        // TODO: Push the shelves
+        todo!()
+    }
+}
+
 struct Zone<T: WarehouseItem> {
     item: Option<T>,
+}
+impl<T: WarehouseItem> Zone<T> {
+    fn new(item: Option<T>) -> Self {
+        Self { item }
+    }
 }
 
 trait WarehouseItem {
