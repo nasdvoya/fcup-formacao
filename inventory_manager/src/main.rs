@@ -5,10 +5,25 @@ fn main() {
 }
 
 fn test_function() {
-    let _foo: Shelf<SomeItem> = Shelf::new(10);
-    println!("This test shelf {:#?}", _foo);
-    let _bar: Warehouse<SomeItem> = Warehouse::new(2, 3, 1);
-    println!("This test warehouse {:#?}", _bar);
+    let mut _bar: Warehouse<SomeItem> = Warehouse::new(3, 3, 4, 4);
+    let normal_item = SomeItem {
+        id: 123,
+        name: "CoolItem".to_string(),
+        quality: Quality::Normal,
+        quantity: 100,
+        timestamp: SystemTime::now(),
+    };
+
+    let oversized_item = SomeItem {
+        id: 123,
+        name: "CoolItem".to_string(),
+        quality: Quality::Oversized { size: (2) },
+        quantity: 100,
+        timestamp: SystemTime::now(),
+    };
+    // _bar.place_item(normal_item, 0, 0, 0, 0);
+    // _bar.place_item(oversized_item, 0, 0, 0, 1);
+    println!("This warehouse: {:#?}", _bar)
 }
 
 #[derive(Debug)]
@@ -16,59 +31,107 @@ struct Warehouse<T: WarehouseItem> {
     rows: Vec<Row<T>>,
 }
 
-impl<T: WarehouseItem> Warehouse<T> {}
-
 #[derive(Debug)]
 struct Row<T: WarehouseItem> {
     shelves: Vec<Shelf<T>>,
 }
 
-impl<T: WarehouseItem> Row<T> {
-    fn new(shelves: usize, zones: usize) -> Self {
-        let shelves: Vec<Shelf<T>> = (0..shelves).map(|_| Shelf::new(zones)).collect();
+#[derive(Debug)]
+struct Shelf<T: WarehouseItem> {
+    levels: Vec<Level<T>>,
+}
+
+#[derive(Debug)]
+struct Level<T: WarehouseItem> {
+    zones: Vec<Zone<T>>,
+}
+
+#[derive(Debug)]
+struct Zone<T: WarehouseItem> {
+    zone_type: ZoneType<T>,
+}
+
+impl<'a, T: WarehouseItem> Warehouse<T> {
+    fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
+        let rows: Vec<Row<T>> = (0..rows).map(|_| Row::new(shelves, levels, zones)).collect();
+        Self { rows }
+    }
+
+    fn place_normal_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+        let placement_zone = self
+            .rows
+            .get_mut(row)
+            .ok_or("Invalid row.")?
+            .shelves
+            .get_mut(shelf)
+            .ok_or("Invalid shelf.")?
+            .levels
+            .get_mut(level)
+            .ok_or("Invalid level.")?
+            .zones
+            .get_mut(zone)
+            .ok_or("Invalid zone.")?;
+
+        *placement_zone = Zone::new_normal(item);
+
+        Ok(())
+    }
+
+    fn place_oversized_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+        let size = match item.quality() {
+            Quality::Oversized { size } => size,
+            _ => return Err("Item is not oversized"),
+        };
+        let placement_zone = self
+            .rows
+            .get_mut(row)
+            .ok_or("Invalid row.")?
+            .shelves
+            .get_mut(shelf)
+            .ok_or("Invalid shelf.")?
+            .levels
+            .get_mut(level)
+            .ok_or("Invalid level.")?;
+
+        placement_zone.zones[zone] = Zone::new_oversized(item);
+
+        Ok(())
+    }
+}
+
+impl<'a, T: WarehouseItem> Row<T> {
+    fn new(shelves: usize, levels: usize, zones: usize) -> Self {
+        let shelves: Vec<Shelf<T>> = (0..shelves).map(|_| Shelf::new(levels, zones)).collect();
         Self { shelves }
     }
 }
 
-#[derive(Debug)]
-struct Shelf<'a, T: WarehouseItem> {
-    levels: Vec<Level<'a, T>>,
-}
-
-impl<'a, T: WarehouseItem> Shelf<'a, T> {
+impl<'a, T: WarehouseItem> Shelf<T> {
     fn new(levels: usize, zones: usize) -> Self {
-        let levels = (0..zones).map(|_| Level::new(zones)).collect();
+        let levels = (0..levels).map(|_| Level::new(zones)).collect();
         Self { levels }
     }
 }
 
-#[derive(Debug)]
-struct Level<'a, T: WarehouseItem> {
-    zones: Vec<Zone<'a, T>>,
-}
-
-impl<'a, T: WarehouseItem> Level<'a, T> {
+impl<'a, T: WarehouseItem> Level<T> {
     fn new(zones: usize) -> Self {
         let zones = (0..zones).map(|_| Zone::new_empty()).collect();
         Self { zones }
     }
 }
 
-#[derive(Debug)]
-struct Zone<'a, T: WarehouseItem> {
-    zone_type: ZoneType<'a, T>,
-}
-
-impl<'a, T: WarehouseItem> Zone<'a, T> {
+impl<'a, T: WarehouseItem> Zone<T> {
     fn new_empty() -> Self {
-        Self { zone_type: ZoneType::Empty }
+        Self {
+            zone_type: ZoneType::Empty,
+        }
     }
     fn new_normal(item: T) -> Self {
         Self {
             zone_type: ZoneType::NormalItem(item),
         }
     }
-    fn new_oversized(item: &'a T) -> Self {
+    fn new_oversized(item: T) -> Self {
         Self {
             zone_type: ZoneType::OversizedItem(item),
         }
@@ -76,16 +139,16 @@ impl<'a, T: WarehouseItem> Zone<'a, T> {
 }
 
 #[derive(Debug)]
-enum ZoneType<'a, T: WarehouseItem> {
+enum ZoneType<T: WarehouseItem> {
     Empty,
     NormalItem(T),
-    OversizedItem(&'a T),
+    OversizedItem(T),
 }
 
 #[derive(Debug)]
 enum Quality {
     Fragile { expiration_date: String, storage_maxlevel: String },
-    Oversized { size: u16 },
+    Oversized { size: u32 },
     Normal,
 }
 
