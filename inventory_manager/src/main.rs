@@ -51,76 +51,35 @@ struct Zone<T: WarehouseItem> {
     zone_type: ZoneType<T>,
 }
 
-impl<'a, T: WarehouseItem> Warehouse<T> {
+impl<T: WarehouseItem> Warehouse<T> {
     fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
         let rows: Vec<Row<T>> = (0..rows).map(|_| Row::new(shelves, levels, zones)).collect();
         Self { rows }
     }
-
-    fn place_normal_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
-        let placement_zone = self
-            .rows
-            .get_mut(row)
-            .ok_or("Invalid row.")?
-            .shelves
-            .get_mut(shelf)
-            .ok_or("Invalid shelf.")?
-            .levels
-            .get_mut(level)
-            .ok_or("Invalid level.")?
-            .zones
-            .get_mut(zone)
-            .ok_or("Invalid zone.")?;
-
-        *placement_zone = Zone::new_normal(item);
-
-        Ok(())
-    }
-
-    fn place_oversized_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
-        let size = match item.quality() {
-            Quality::Oversized { size } => size,
-            _ => return Err("Item is not oversized"),
-        };
-        let placement_zone = self
-            .rows
-            .get_mut(row)
-            .ok_or("Invalid row.")?
-            .shelves
-            .get_mut(shelf)
-            .ok_or("Invalid shelf.")?
-            .levels
-            .get_mut(level)
-            .ok_or("Invalid level.")?;
-
-        placement_zone.zones[zone] = Zone::new_oversized(item);
-
-        Ok(())
-    }
 }
 
-impl<'a, T: WarehouseItem> Row<T> {
+impl<T: WarehouseItem> Row<T> {
     fn new(shelves: usize, levels: usize, zones: usize) -> Self {
         let shelves: Vec<Shelf<T>> = (0..shelves).map(|_| Shelf::new(levels, zones)).collect();
         Self { shelves }
     }
 }
 
-impl<'a, T: WarehouseItem> Shelf<T> {
+impl<T: WarehouseItem> Shelf<T> {
     fn new(levels: usize, zones: usize) -> Self {
         let levels = (0..levels).map(|_| Level::new(zones)).collect();
         Self { levels }
     }
 }
 
-impl<'a, T: WarehouseItem> Level<T> {
+impl<T: WarehouseItem> Level<T> {
     fn new(zones: usize) -> Self {
         let zones = (0..zones).map(|_| Zone::new_empty()).collect();
         Self { zones }
     }
 }
 
-impl<'a, T: WarehouseItem> Zone<T> {
+impl<T: WarehouseItem> Zone<T> {
     fn new_empty() -> Self {
         Self {
             zone_type: ZoneType::Empty,
@@ -158,6 +117,7 @@ trait WarehouseItem {
     fn quality(&self) -> &Quality;
     fn quantity(&self) -> u32;
     fn timestamp(&self) -> SystemTime;
+    // fn occupied_position(&self) -> Option<(usize, usize, usize)>;
 }
 
 #[derive(Debug)]
@@ -187,57 +147,50 @@ impl WarehouseItem for SomeItem {
     }
 }
 
-// impl<T: WarehouseItem> Warehouse<T> {
+// impl<'a, T: WarehouseItem> Warehouse<T> {
 //     fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
-//         let rows: Vec<Row<T>> = (0..rows).map(|_| Row::new(shelves, zones)).collect();
+//         let rows: Vec<Row<T>> = (0..rows).map(|_| Row::new(shelves, levels, zones)).collect();
 //         Self { rows }
 //     }
 //
-//     // methods
-//     //
-//     fn item_allocation(&mut self, item: T) -> (usize, usize, usize) {
-//         match item.quality() {
-//             Quality::Normal => {
-//                 for (row_index, row) in self.rows.iter_mut().enumerate() {
-//                     for (shelf_index, shelf) in row.shelves.iter_mut().enumerate() {
-//                         for (zone_index, zone) in shelf.zones.iter_mut().enumerate() {
-//                             if let None = &zone.item {
-//                                 zone.item = Some(item);
-//                                 return (row_index, shelf_index, zone_index);
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//             Quality::Fragile {
-//                 expiration_date,
-//                 storage_maxlevel,
-//             } => {}
-//             Quality::Oversized { size } => {}
-//         }
-//         todo!()
+//     fn place_normal_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+//         let placement_zone = self
+//             .rows
+//             .get_mut(row)
+//             .ok_or("Invalid row.")?
+//             .shelves
+//             .get_mut(shelf)
+//             .ok_or("Invalid shelf.")?
+//             .levels
+//             .get_mut(level)
+//             .ok_or("Invalid level.")?
+//             .zones
+//             .get_mut(zone)
+//             .ok_or("Invalid zone.")?;
+//
+//         *placement_zone = Zone::new_normal(item);
+//
+//         Ok(())
 //     }
 //
-//     fn item_placement(&mut self, item: T) {
-//         match item.quality() {
-//             Quality::Fragile {
-//                 expiration_date,
-//                 storage_maxlevel,
-//             } => todo!(),
-//             Quality::Oversized { size } => todo!(),
-//             Quality::Normal => {
-//                 for (row_index, row) in self.rows.iter_mut().enumerate() {
-//                     for (shelf_index, shelf) in row.shelves.iter_mut().enumerate() {
-//                         for (zone_index, zone) in shelf.zones.iter_mut().enumerate() {
-//                             if let None = &zone.item {
-//                                 zone.item = Some(item);
-//                                 return;
-//                             } else {
-//                             }
-//                         }
-//                     }
-//                 }
-//             }
-//         }
+//     fn place_oversized_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+//         let size = match item.quality() {
+//             Quality::Oversized { size } => size,
+//             _ => return Err("Item is not oversized"),
+//         };
+//         let placement_zone = self
+//             .rows
+//             .get_mut(row)
+//             .ok_or("Invalid row.")?
+//             .shelves
+//             .get_mut(shelf)
+//             .ok_or("Invalid shelf.")?
+//             .levels
+//             .get_mut(level)
+//             .ok_or("Invalid level.")?;
+//
+//         placement_zone.zones[zone] = Zone::new_oversized(item);
+//
+//         Ok(())
 //     }
 // }
