@@ -2,11 +2,6 @@ fn main() {
     exercise_store();
 }
 
-#[derive(Debug)]
-pub struct Shop {
-    rows: Vec<Row>,
-}
-
 pub fn exercise_store() {
     let mut ashop = Shop::new();
     println!("Shop: {:#?}", ashop);
@@ -20,12 +15,23 @@ pub fn exercise_store() {
     println!("Move: {:#?}", ashop);
 }
 
+#[derive(Debug)]
+pub struct Shop {
+    rows: Vec<Row>,
+}
+
 impl Shop {
     pub fn new() -> Self {
         let mut rows = Vec::new();
-        rows.push(Row::new(1, vec![Zone::new("Salty"), Zone::new("Sweets"), Zone::new("Drinks")]));
+        rows.push(Row::new(
+            1,
+            vec![Zone::new("Salty"), Zone::new("Sweets"), Zone::new("Drinks")],
+        ));
         rows.push(Row::new(2, vec![Zone::new("Soda"), Zone::new("Water"), Zone::new("Alcohol")]));
-        rows.push(Row::new(3, vec![Zone::new("Yogurt"), Zone::new("Butter"), Zone::new("Salad")]));
+        rows.push(Row::new(
+            3,
+            vec![Zone::new("Yogurt"), Zone::new("Butter"), Zone::new("Salad")],
+        ));
 
         Self { rows }
     }
@@ -108,7 +114,10 @@ pub struct Zone {
 impl Zone {
     // TODO: Review life cycle
     fn new(name: &'static str) -> Self {
-        Zone { name, products: Vec::new() }
+        Zone {
+            name,
+            products: Vec::new(),
+        }
     }
 }
 
