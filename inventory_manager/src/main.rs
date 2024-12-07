@@ -91,7 +91,26 @@ impl<T: WarehouseItem> Warehouse<T> {
         Ok(())
     }
 
-    fn place_oversized_item(&mut self, item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+    fn place_oversized_item(&mut self, id: &u64, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+        let placement_zone = self
+            .rows
+            .get_mut(row)
+            .ok_or("Invalid row.")?
+            .shelves
+            .get_mut(shelf)
+            .ok_or("Invalid shelf.")?
+            .levels
+            .get_mut(level)
+            .ok_or("Invalid level.")?;
+
+        match self.items.get_mut(id) {
+            Some(item) => {
+                item.change_position(row, shelf, level, zone);
+            }
+            None => {
+                println!("Item not found")
+            }
+        }
         Ok(())
     }
 }
@@ -193,7 +212,14 @@ impl WarehouseItem for SomeItem {
     }
 
     fn change_position(&mut self, row: usize, shelf: usize, level: usize, zone: usize) {
-        self.allocated_position = Some((row, shelf, level, zone));
+        match self.quality() {
+            Quality::Fragile {
+                expiration_date,
+                storage_maxlevel,
+            } => todo!(),
+            Quality::Oversized { size } => todo!(),
+            Quality::Normal => self.allocated_position = Some((row, shelf, level, zone)),
+        }
     }
 }
 
