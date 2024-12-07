@@ -24,7 +24,7 @@ fn test_function() {
         allocated_position: None,
     };
     println!("Before item: {:#?}", _bar);
-    _bar.place_normal_item(normal_item, 0, 0, 0, 0);
+    _bar.place_normal_item(&normal_item.id(), 0, 0, 0, 0);
     // _bar.place_item(oversized_item, 0, 0, 0, 1);
     println!("After item: {:#?}", _bar)
 }
@@ -63,8 +63,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         Self { rows, items }
     }
 
-    // WARNING: Chnage item to id, name, etc. Read notes.
-    fn place_normal_item(&mut self, mut item: T, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
+    fn place_normal_item(&mut self, id: &u64, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
         let placement_zone = self
             .rows
             .get_mut(row)
@@ -79,7 +78,7 @@ impl<T: WarehouseItem> Warehouse<T> {
             .get_mut(zone)
             .ok_or("Invalid zone.")?;
 
-        match self.items.get_mut(&item.id()) {
+        match self.items.get_mut(id) {
             Some(item) => {
                 item.change_position(row, shelf, level, zone);
                 *placement_zone = Zone::normal_item();
