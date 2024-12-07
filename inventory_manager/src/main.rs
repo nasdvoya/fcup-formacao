@@ -63,6 +63,29 @@ impl<T: WarehouseItem> Warehouse<T> {
         Self { rows, items }
     }
 
+    fn change_item_position(&mut self, id: &u64, row: usize, shelf: usize, level: usize, starting_zone: usize) -> Result<(), &'static str> {
+        let item = self.items.get_mut(id).ok_or("Item not found")?;
+
+        let zones_indexes = match item.quality() {
+            Quality::Fragile {
+                expiration_date,
+                storage_maxlevel,
+            } => vec![starting_zone],
+            Quality::Oversized { size } => (starting_zone..starting_zone + *size).collect::<Vec<usize>>(),
+            Quality::Normal => todo!(),
+        };
+
+        item.set_occupied_position(OccupiedPosition {
+            row: row,
+            shelf,
+            level,
+            starting_zone,
+            zones_indexes,
+        });
+
+        Ok(())
+    }
+
     fn place_normal_item(&mut self, id: &u64, row: usize, shelf: usize, level: usize, zone: usize) -> Result<(), &'static str> {
         let placement_zone = self
             .rows
@@ -81,7 +104,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         match self.items.get_mut(id) {
             Some(item) => {
                 // item.change_position(row, shelf, level, zone);
-                // *placement_zone = Zone::normal_item(item.id());
+                *placement_zone = Zone::normal_item(item.id());
             }
             None => {
                 println!("Item not found")
@@ -170,15 +193,24 @@ enum Quality {
     Normal,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct OccupiedPosition {
+    row: usize,
+    shelf: usize,
+    level: usize,
+    starting_zone: usize,
+    zones_indexes: Vec<usize>,
+}
+
 trait WarehouseItem {
     fn id(&self) -> u64;
     fn name(&self) -> &str;
     fn quality(&self) -> &Quality;
     fn quantity(&self) -> u32;
     fn timestamp(&self) -> SystemTime;
-    fn occupied_position(&self) -> Option<&(usize, usize, usize, usize, Vec<usize>)>;
+    fn occupied_position(&self) -> Option<&OccupiedPosition>;
+    fn set_occupied_position(&mut self, position: OccupiedPosition);
     fn change_position(&mut self, row: usize, shelf: usize, level: usize, starting_zone: usize);
-    // fn occupied_position(&self) -> Option<(usize, usize, usize)>;
 }
 
 #[derive(Debug)]
@@ -188,7 +220,7 @@ struct SomeItem {
     quality: Quality,
     quantity: u32,
     timestamp: SystemTime,
-    occupied_position: Option<(usize, usize, usize, usize, Vec<usize>)>,
+    occupied_position: Option<OccupiedPosition>,
 }
 
 impl WarehouseItem for SomeItem {
@@ -207,7 +239,12 @@ impl WarehouseItem for SomeItem {
     fn timestamp(&self) -> SystemTime {
         self.timestamp
     }
-    fn occupied_position(&self) -> Option<&(usize, usize, usize, usize, Vec<usize>)> {
+
+    fn set_occupied_position(&mut self, position: OccupiedPosition) {
+        self.occupied_position = Some(position);
+    }
+
+    fn occupied_position(&self) -> Option<&OccupiedPosition> {
         self.occupied_position.as_ref()
     }
 
@@ -218,14 +255,32 @@ impl WarehouseItem for SomeItem {
                 expiration_date,
                 storage_maxlevel,
             } => {
-                self.occupied_position = Some((row, shelf, level, starting_zone, vec![starting_zone]));
+                self.occupied_position = Some(OccupiedPosition {
+                    row,
+                    shelf,
+                    level,
+                    starting_zone,
+                    zones_indexes: vec![starting_zone],
+                });
             }
             Quality::Oversized { size } => {
                 let zones_indexes: Vec<usize> = (starting_zone..starting_zone + *size).collect::<Vec<_>>();
-                self.occupied_position = Some((row, shelf, level, starting_zone, zones_indexes));
+                self.occupied_position = Some(OccupiedPosition {
+                    row,
+                    shelf,
+                    level,
+                    starting_zone,
+                    zones_indexes,
+                });
             }
             Quality::Normal => {
-                self.occupied_position = Some((row, shelf, level, starting_zone, vec![starting_zone]));
+                self.occupied_position = Some(OccupiedPosition {
+                    row,
+                    shelf,
+                    level,
+                    starting_zone,
+                    zones_indexes: vec![starting_zone],
+                });
             }
         }
     }
