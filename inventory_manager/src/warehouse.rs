@@ -1,4 +1,7 @@
+use chrono::{DateTime, Utc};
+
 use crate::item::{OccupiedPosition, Quality, WarehouseItem};
+use chrono::Duration;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -98,6 +101,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         });
         Ok(())
     }
+
     /// Since the exercise does not specify, search by name returns the first item found.
     pub fn get_item_quantity(&self, search_type: SearchType) -> (bool, Option<u32>) {
         match search_type {
@@ -111,6 +115,7 @@ impl<T: WarehouseItem> Warehouse<T> {
             },
         }
     }
+
     pub fn get_item_location(&self, name: String) -> Vec<&OccupiedPosition> {
         self.items
             .values()
@@ -119,6 +124,32 @@ impl<T: WarehouseItem> Warehouse<T> {
                     item.occupied_position()
                 } else {
                     None
+                }
+            })
+            .collect()
+    }
+
+    pub fn sort_items(&self) -> Vec<&T> {
+        let mut items: Vec<&T> = self.items.values().collect();
+        items.sort_by(|a, b| a.name().cmp(b.name()));
+        items
+    }
+
+    /// get items that expired or are within 3 days of expiration
+    pub fn get_expire_items(&self) -> Vec<&T> {
+        let now = Utc::now();
+
+        self.items
+            .values()
+            .filter(|item| {
+                if let Quality::Fragile { expiration_date, .. } = item.quality() {
+                    if let Ok(expiration_date) = expiration_date.parse::<DateTime<Utc>>() {
+                        expiration_date <= now || expiration_date <= now + Duration::days(3)
+                    } else {
+                        false
+                    }
+                } else {
+                    false
                 }
             })
             .collect()

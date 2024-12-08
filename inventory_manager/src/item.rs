@@ -33,7 +33,7 @@ pub struct SomeItem {
 pub enum Quality {
     Fragile {
         expiration_date: String,
-        storage_maxlevel: String,
+        storage_maxlevel: usize,
     },
     Oversized {
         size: usize,
