@@ -34,6 +34,11 @@ enum ZoneType {
     OversizedItem { id: u64 },
 }
 
+pub enum SearchType {
+    ById { id: u64 },
+    ByName(String),
+}
+
 impl<T: WarehouseItem> Warehouse<T> {
     pub fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
         let rows: Vec<Row> = (0..rows).map(|_| Row::new(shelves, levels, zones)).collect();
@@ -93,7 +98,19 @@ impl<T: WarehouseItem> Warehouse<T> {
         });
         Ok(())
     }
-
+    /// Since the exercise does not specify, search by name returns the first item found.
+    pub fn get_item_quantity(&self, search_type: SearchType) -> (bool, Option<u32>) {
+        match search_type {
+            SearchType::ById { id } => match self.items.get(&id) {
+                Some(item) => (true, Some(item.quantity())),
+                None => (false, None),
+            },
+            SearchType::ByName(name) => match self.items.values().find(|item| item.name() == name.as_str()) {
+                Some(item) => (true, Some(item.quantity())),
+                None => (false, None),
+            },
+        }
+    }
     pub fn get_item_location(&self, name: String) -> Vec<&OccupiedPosition> {
         self.items
             .values()

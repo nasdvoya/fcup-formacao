@@ -3,7 +3,7 @@ mod warehouse;
 
 use item::{Quality, SomeItem};
 use std::time::SystemTime;
-use warehouse::Warehouse;
+use warehouse::{SearchType, Warehouse};
 
 fn main() {
     let mut _warehouse: Warehouse<SomeItem> = Warehouse::new(1, 2, 2, 8);
@@ -46,6 +46,8 @@ fn main() {
 
     println!("After update: {:#?}", _warehouse);
 
+    let item_quantity = _warehouse.get_item_quantity(SearchType::ByName("CoolItem".to_string()));
+    println!("Item quantity: {:#?}", item_quantity);
     let locations = _warehouse.get_item_location("CoolItem".to_string());
     for location in locations {
         println!("Location: {:?}", location);
