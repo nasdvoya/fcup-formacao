@@ -1,5 +1,3 @@
-use std::time::SystemTime;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OccupiedPosition {
     pub row: usize,
@@ -14,7 +12,7 @@ pub trait WarehouseItem {
     fn name(&self) -> &str;
     fn quality(&self) -> &Quality;
     fn quantity(&self) -> u32;
-    fn timestamp(&self) -> SystemTime;
+    fn timestamp(&self) -> i64;
     fn occupied_position(&self) -> Option<&OccupiedPosition>;
     fn set_occupied_position(&mut self, position: OccupiedPosition);
 }
@@ -25,14 +23,14 @@ pub struct SomeItem {
     pub name: String,
     pub quality: Quality,
     pub quantity: u32,
-    pub timestamp: SystemTime,
+    pub timestamp: i64,
     pub occupied_position: Option<OccupiedPosition>,
 }
 
 #[derive(Debug)]
 pub enum Quality {
     Fragile {
-        expiration_date: String,
+        expiration_date: i64,
         storage_maxlevel: usize,
     },
     Oversized {
@@ -54,7 +52,7 @@ impl WarehouseItem for SomeItem {
     fn quantity(&self) -> u32 {
         self.quantity
     }
-    fn timestamp(&self) -> SystemTime {
+    fn timestamp(&self) -> i64 {
         self.timestamp
     }
     fn occupied_position(&self) -> Option<&OccupiedPosition> {

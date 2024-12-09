@@ -137,20 +137,14 @@ impl<T: WarehouseItem> Warehouse<T> {
 
     /// get items that expired or are within 3 days of expiration
     pub fn get_expire_items(&self) -> Vec<&T> {
-        let now = Utc::now();
+        let now = Utc::now().timestamp();
+        let threshold = now + (3 * 24 * 60 * 60);
 
         self.items
             .values()
-            .filter(|item| {
-                if let Quality::Fragile { expiration_date, .. } = item.quality() {
-                    if let Ok(expiration_date) = expiration_date.parse::<DateTime<Utc>>() {
-                        expiration_date <= now || expiration_date <= now + Duration::days(3)
-                    } else {
-                        false
-                    }
-                } else {
-                    false
-                }
+            .filter(|item| match item.quality() {
+                Quality::Fragile { expiration_date, .. } => *expiration_date <= threshold,
+                _ => false,
             })
             .collect()
     }
