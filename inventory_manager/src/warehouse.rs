@@ -1,7 +1,6 @@
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 
 use crate::item::{OccupiedPosition, Quality, WarehouseItem};
-use chrono::Duration;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -57,7 +56,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         Ok(())
     }
 
-    pub fn update_item_position(
+    pub fn place_item(
         &mut self,
         id: &u64,
         row: usize,
@@ -78,17 +77,24 @@ impl<T: WarehouseItem> Warehouse<T> {
             .ok_or("Invalid level.")?;
 
         let zones_indexes = match item.quality() {
-            Quality::Fragile { .. } | Quality::Normal => {
+            Quality::Normal | Quality::Fragile { .. } => {
+                if let Quality::Fragile { storage_maxlevel, .. } = item.quality() {
+                    if level >= *storage_maxlevel {
+                        return Err("Item cannot be stored above the maximum level.");
+                    }
+                }
                 let placement_zone = item_level.zones.get_mut(start_zone).ok_or("Invalid zone.")?;
                 *placement_zone = Zone::normal_item(item.id());
                 vec![start_zone]
             }
             Quality::Oversized { size } => {
+                let mut zones = vec![];
                 for z_index in start_zone..start_zone + size {
                     let placement_zone = item_level.zones.get_mut(z_index).ok_or("Invalid zone.")?;
                     *placement_zone = Zone::oversized_item(item.id());
+                    zones.push(z_index);
                 }
-                (start_zone..start_zone + size).collect::<Vec<usize>>()
+                zones
             }
         };
 

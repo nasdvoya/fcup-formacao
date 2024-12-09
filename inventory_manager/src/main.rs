@@ -61,18 +61,18 @@ fn main() {
 
     // Update item position
     println!("After item: {:#?}", _warehouse);
-    if let Err(e) = _warehouse.update_item_position(&125, 0, 0, 0, 0) {
+    if let Err(e) = _warehouse.place_item(&125, 0, 0, 0, 0) {
         println!("Error: {}", e);
     }
-    if let Err(e) = _warehouse.update_item_position(&125, 1, 0, 0, 0) {
+    if let Err(e) = _warehouse.place_item(&125, 1, 0, 0, 0) {
         println!("Error: {}", e);
     }
-    if let Err(e) = _warehouse.update_item_position(&1, 0, 0, 0, 0) {
+    if let Err(e) = _warehouse.place_item(&1, 0, 0, 0, 0) {
         println!("Error: {}", e);
     }
-    if let Err(e) = _warehouse.update_item_position(&2, 0, 0, 0, 0) {
-        panic!("Error: {}", e);
-    }
+    // if let Err(e) = _warehouse.place_item(&2, 0, 0, 0, 0) {
+    //     panic!("Error: {}", e);
+    // }
 
     println!("After update: {:#?}", _warehouse);
 
