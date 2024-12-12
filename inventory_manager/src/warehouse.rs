@@ -97,14 +97,20 @@ impl<T: WarehouseItem> Warehouse<T> {
                 zones
             }
         };
-
-        item.set_occupied_position(OccupiedPosition {
+        item.set_occupied_position(Some(OccupiedPosition {
             row,
             shelf,
             level,
             start_zone,
             zones_indexes,
-        });
+        }));
+        Ok(())
+    }
+
+    pub fn remove_item(&mut self, id: &u64) -> Result<(), &'static str> {
+        if let Some(item) = self.items.get_mut(id) {
+            item.set_occupied_position(None);
+        }
         Ok(())
     }
 

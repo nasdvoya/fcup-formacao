@@ -94,4 +94,6 @@ fn main() {
     println!("Some date {:#?}", today);
     let expired_items = _warehouse.get_expire_items(today);
     println!("Expired items: {:#?}", expired_items);
+    _warehouse.remove_item(&125);
+    println!("After remove item: {:#?}", _warehouse);
 }

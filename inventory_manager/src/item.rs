@@ -16,7 +16,7 @@ pub trait WarehouseItem {
     fn quantity(&self) -> u32;
     fn timestamp(&self) -> i64;
     fn occupied_position(&self) -> Option<&OccupiedPosition>;
-    fn set_occupied_position(&mut self, position: OccupiedPosition);
+    fn set_occupied_position(&mut self, position: Option<OccupiedPosition>);
 }
 
 #[derive(Debug)]
@@ -60,7 +60,7 @@ impl WarehouseItem for SomeItem {
     fn occupied_position(&self) -> Option<&OccupiedPosition> {
         self.occupied_position.as_ref()
     }
-    fn set_occupied_position(&mut self, position: OccupiedPosition) {
-        self.occupied_position = Some(position);
+    fn set_occupied_position(&mut self, position: Option<OccupiedPosition>) {
+        self.occupied_position = position;
     }
 }
