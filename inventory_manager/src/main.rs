@@ -36,7 +36,7 @@ fn main() {
         id: 1,
         name: "FragileItem".to_string(),
         quality: Quality::Fragile {
-            expiration_date: Utc::now().timestamp() + (2 * 24 * 60 * 60), // Simular 2 dias
+            expiration_date: Utc.ymd(2024, 12, 13).and_hms(22, 10, 10), // Simular 2 dias
             storage_maxlevel: 1,
         },
         quantity: 50,
@@ -90,6 +90,8 @@ fn main() {
 
     // Get expired items example
     let some_date = Utc.with_ymd_and_hms(2014, 7, 8, 9, 10, 11).unwrap();
-    let expired_items = _warehouse.get_expire_items(some_date);
+    let today = Utc::now();
+    println!("Some date {:#?}", today);
+    let expired_items = _warehouse.get_expire_items(today);
     println!("Expired items: {:#?}", expired_items);
 }

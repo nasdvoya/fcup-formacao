@@ -1,3 +1,5 @@
+use chrono::{DateTime, Utc};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OccupiedPosition {
     pub row: usize,
@@ -30,7 +32,7 @@ pub struct SomeItem {
 #[derive(Debug)]
 pub enum Quality {
     Fragile {
-        expiration_date: i64,
+        expiration_date: DateTime<Utc>,
         storage_maxlevel: usize,
     },
     Oversized {
