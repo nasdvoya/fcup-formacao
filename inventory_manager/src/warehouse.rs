@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 
 use crate::item::{OccupiedPosition, Quality, WarehouseItem};
 use std::collections::HashMap;
@@ -141,9 +141,11 @@ impl<T: WarehouseItem> Warehouse<T> {
         items
     }
 
-    /// get items that expired or are within 3 days of expiration
-    pub fn get_expire_items(&self) -> Vec<&T> {
-        let now = Utc::now().timestamp();
+    /// Get items that expired or are within 3 days of expiration
+    /// # Arguments
+    /// * `date` - DateTime to check expiration date
+    pub fn get_expire_items(&self, date: DateTime<Utc>) -> Vec<&T> {
+        let now = date.timestamp();
         let threshold = now + (3 * 24 * 60 * 60);
 
         self.items

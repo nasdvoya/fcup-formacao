@@ -1,7 +1,7 @@
 mod item;
 mod warehouse;
 
-use chrono::Utc;
+use chrono::{TimeZone, Utc};
 use item::{Quality, SomeItem};
 use warehouse::{SearchType, Warehouse};
 
@@ -89,6 +89,7 @@ fn main() {
     println!("Items: {:#?}", items);
 
     // Get expired items example
-    let expired_items = _warehouse.get_expire_items();
+    let some_date = Utc.with_ymd_and_hms(2014, 7, 8, 9, 10, 11).unwrap();
+    let expired_items = _warehouse.get_expire_items(some_date);
     println!("Expired items: {:#?}", expired_items);
 }
