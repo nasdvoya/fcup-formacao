@@ -56,6 +56,8 @@ impl<T: WarehouseItem> Warehouse<T> {
         Ok(())
     }
 
+    pub fn item_placement_strategy(&self) -> () {}
+
     pub fn place_item(
         &mut self,
         id: &u64,
