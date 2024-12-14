@@ -41,6 +41,11 @@ pub enum SearchType {
     ByName(String),
 }
 
+pub enum PlacementStrategy {
+    FirstAvailable,
+    RoundRobin,
+}
+
 impl<T: WarehouseItem> Warehouse<T> {
     pub fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
         let rows: Vec<Row> = (0..rows).map(|_| Row::new(shelves, levels, zones)).collect();
@@ -56,7 +61,12 @@ impl<T: WarehouseItem> Warehouse<T> {
         Ok(())
     }
 
-    pub fn item_placement_strategy(&self) -> () {}
+    pub fn item_placement(&self, strategy: PlacementStrategy, item: &T) -> () {
+        match strategy {
+            PlacementStrategy::FirstAvailable => todo!(),
+            PlacementStrategy::RoundRobin => todo!(),
+        }
+    }
 
     pub fn place_item(
         &mut self,
