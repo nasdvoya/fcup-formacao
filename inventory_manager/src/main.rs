@@ -3,97 +3,70 @@ mod warehouse;
 
 use chrono::{TimeZone, Utc};
 use item::{Quality, SomeItem};
-use warehouse::{SearchType, Warehouse};
+use warehouse::{PlacementStrategy, Warehouse};
 
 fn main() {
-    let mut _warehouse: Warehouse<SomeItem> = Warehouse::new(4, 2, 2, 8);
+    let mut warehouse: Warehouse<SomeItem> = Warehouse::new(2, 2, 2, 4);
+
     let normal_item = SomeItem {
         id: 125,
-        name: "BCoolItem".to_string(),
+        name: "NormalItem".to_string(),
         quality: Quality::Normal,
         quantity: 100,
         timestamp: Utc::now().timestamp(),
         occupied_position: None,
     };
 
-    let normal_item_again = SomeItem {
-        id: 127,
-        name: "CoolItem".to_string(),
-        quality: Quality::Normal,
-        quantity: 100,
-        timestamp: Utc::now().timestamp(),
-        occupied_position: None,
-    };
     let oversized_item = SomeItem {
-        id: 121,
-        name: "ACoolOversized".to_string(),
+        id: 126,
+        name: "OversizedItem".to_string(),
         quality: Quality::Oversized { size: 2 },
-        quantity: 100,
-        timestamp: Utc::now().timestamp(),
-        occupied_position: None,
-    };
-    let fragile_item = SomeItem {
-        id: 1,
-        name: "FragileItem".to_string(),
-        quality: Quality::Fragile {
-            expiration_date: Utc.ymd(2024, 12, 13).and_hms(22, 10, 10), // Simular 2 dias
-            storage_maxlevel: 1,
-        },
         quantity: 50,
         timestamp: Utc::now().timestamp(),
         occupied_position: None,
     };
 
-    // Add items to "pile"
-    println!("Before item: {:#?}", _warehouse);
-    if let Err(e) = _warehouse.add_item(normal_item) {
-        println!("Error: {}", e);
-    }
-    if let Err(e) = _warehouse.add_item(normal_item_again) {
-        println!("Error: {}", e);
-    }
-    if let Err(e) = _warehouse.add_item(oversized_item) {
-        println!("Error: {}", e);
-    }
-    if let Err(e) = _warehouse.add_item(fragile_item) {
-        println!("Error: {}", e);
-    }
+    let fragile_item = SomeItem {
+        id: 127,
+        name: "FragileItem".to_string(),
+        quality: Quality::Fragile {
+            expiration_date: Utc.ymd(2024, 12, 13).and_hms(22, 10, 10),
+            storage_maxlevel: 1,
+        },
+        quantity: 30,
+        timestamp: Utc::now().timestamp(),
+        occupied_position: None,
+    };
 
-    // Update item position
-    println!("After item: {:#?}", _warehouse);
-    if let Err(e) = _warehouse.place_item(&125, 0, 0, 0, 0) {
+    println!("Testing FirstAvailable placement strategy:");
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, normal_item) {
         println!("Error: {}", e);
     }
-    if let Err(e) = _warehouse.place_item(&125, 1, 0, 0, 0) {
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, oversized_item) {
         println!("Error: {}", e);
     }
-    if let Err(e) = _warehouse.place_item(&1, 0, 0, 0, 0) {
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, fragile_item) {
         println!("Error: {}", e);
     }
-    // if let Err(e) = _warehouse.place_item(&2, 0, 0, 0, 0) {
-    //     panic!("Error: {}", e);
-    // }
+    println!("Warehouse after FirstAvailable placement: {:#?}", warehouse);
 
-    println!("After update: {:#?}", _warehouse);
+    // Remove an item
+    println!("Removing item with ID 125...");
+    warehouse.remove_item(&125).unwrap();
 
-    // Get item quantity example
-    let item_quantity = _warehouse.get_item_quantity(SearchType::ByName("CoolItem".to_string()));
-    println!("Item quantity: {:#?}", item_quantity);
+    // Re-add using RoundRobin placement strategy
+    let normal_item = SomeItem {
+        id: 125,
+        name: "NormalItem".to_string(),
+        quality: Quality::Normal,
+        quantity: 100,
+        timestamp: Utc::now().timestamp(),
+        occupied_position: None,
+    };
 
-    // Get item location example
-    let locations = _warehouse.get_item_location("CoolItem".to_string());
-    println!("Locations: {:#?}", locations);
-
-    // Sort example
-    let items = _warehouse.sort_items();
-    println!("Items: {:#?}", items);
-
-    // Get expired items example
-    let some_date = Utc.with_ymd_and_hms(2014, 7, 8, 9, 10, 11).unwrap();
-    let today = Utc::now();
-    println!("Some date {:#?}", today);
-    let expired_items = _warehouse.get_expire_items(today);
-    println!("Expired items: {:#?}", expired_items);
-    _warehouse.remove_item(&125);
-    println!("After remove item: {:#?}", _warehouse);
+    println!("Testing RoundRobin placement strategy:");
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, normal_item) {
+        println!("Error: {}", e);
+    }
+    // println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
 }

@@ -7,6 +7,7 @@ use std::collections::HashMap;
 pub struct Warehouse<T: WarehouseItem> {
     rows: Vec<Row>,
     items: HashMap<u64, T>,
+    robin_trakcer: (usize, usize, usize, usize),
 }
 
 #[derive(Debug)]
@@ -50,7 +51,11 @@ impl<T: WarehouseItem> Warehouse<T> {
     pub fn new(rows: usize, shelves: usize, levels: usize, zones: usize) -> Self {
         let rows: Vec<Row> = (0..rows).map(|_| Row::new(shelves, levels, zones)).collect();
         let items: HashMap<u64, T> = HashMap::new();
-        Self { rows, items }
+        Self {
+            rows,
+            items,
+            robin_trakcer: (0, 0, 0, 0),
+        }
     }
 
     pub fn add_item(&mut self, item: T) -> Result<(), &'static str> {
@@ -61,22 +66,105 @@ impl<T: WarehouseItem> Warehouse<T> {
         Ok(())
     }
 
-    pub fn item_placement(&self, strategy: PlacementStrategy, item: &T) -> () {
-        match strategy {
-            PlacementStrategy::FirstAvailable => todo!(),
-            PlacementStrategy::RoundRobin => todo!(),
+    pub fn item_placement(&mut self, strategy: PlacementStrategy, item: T) -> Result<(), &'static str> {
+        if self.items.contains_key(&item.id()) {
+            return Err("Item with specified ID already exists.");
         }
+
+        // Handle placement logic
+        match strategy {
+            PlacementStrategy::FirstAvailable => self.first_available_placement(item),
+            PlacementStrategy::RoundRobin => self.round_robin_placement(item),
+        }
+    }
+
+    fn first_available_placement(&mut self, item: T) -> Result<(), &'static str> {
+        for (row_idx, row) in self.rows.iter().enumerate() {
+            for (shelf_idx, shelf) in row.shelves.iter().enumerate() {
+                for (level_idx, level) in shelf.levels.iter().enumerate() {
+                    if let Some(valid_zones) = self.find_valid_zones(&item, &level.zones, 0) {
+                        // Move the item into place_item
+                        return self.place_item(item, row_idx, shelf_idx, level_idx, valid_zones[0]);
+                    }
+                }
+            }
+        }
+        Err("No suitable space available in the warehouse.")
+    }
+
+    fn round_robin_placement(&mut self, item: T) -> Result<(), &'static str> {
+        let (mut row, mut shelf, mut level, mut zone) = self.robin_trakcer;
+
+        loop {
+            let current_row = self.rows.get(row).ok_or("Invalid row")?;
+            let current_shelf = current_row.shelves.get(shelf).ok_or("Invalid shelf")?;
+            let current_level = current_shelf.levels.get(level).ok_or("Invalid level")?;
+
+            if let Some(valid_zones) = self.find_valid_zones(&item, &current_level.zones, zone) {
+                // Move the item into place_item
+                let result = self.place_item(item, row, shelf, level, valid_zones[0]);
+                if result.is_ok() {
+                    self.update_robin_tracker(row, shelf, level, valid_zones.last().unwrap() + 1);
+                }
+                return result;
+            }
+
+            // Increment through the zones in round-robin fashion
+            zone += 1;
+            if zone >= current_level.zones.len() {
+                zone = 0;
+                level += 1;
+
+                if level >= current_shelf.levels.len() {
+                    level = 0;
+                    shelf += 1;
+
+                    if shelf >= current_row.shelves.len() {
+                        shelf = 0;
+                        row += 1;
+
+                        if row >= self.rows.len() {
+                            return Err("No suitable space available in the warehouse.");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn find_valid_zones(&self, item: &T, zones: &[Zone], start_zone: usize) -> Option<Vec<usize>> {
+        match item.quality() {
+            Quality::Normal | Quality::Fragile { .. } => zones
+                .iter()
+                .enumerate()
+                .skip(start_zone)
+                .find(|(_, zone)| matches!(zone.zone_type, ZoneType::Empty))
+                .map(|(index, _)| vec![index]),
+            Quality::Oversized { size } => {
+                for start in start_zone..=zones.len() - size {
+                    let block = &zones[start..start + size];
+                    if block.iter().all(|zone| matches!(zone.zone_type, ZoneType::Empty)) {
+                        return Some((start..start + size).collect());
+                    }
+                }
+                None
+            }
+        }
+    }
+
+    fn update_robin_tracker(&mut self, row: usize, shelf: usize, level: usize, zone: usize) {
+        self.robin_trakcer = (row, shelf, level, zone);
     }
 
     pub fn place_item(
         &mut self,
-        id: &u64,
+        item: T,
         row: usize,
         shelf: usize,
         level: usize,
         start_zone: usize,
     ) -> Result<(), &'static str> {
-        let item = self.items.get_mut(id).ok_or("Item not found")?;
+        // Get the level where the item needs to be placed.
         let item_level = self
             .rows
             .get_mut(row)
@@ -88,6 +176,7 @@ impl<T: WarehouseItem> Warehouse<T> {
             .get_mut(level)
             .ok_or("Invalid level.")?;
 
+        // Determine the zones to occupy based on the item's quality.
         let zones_indexes = match item.quality() {
             Quality::Normal | Quality::Fragile { .. } => {
                 if let Quality::Fragile { storage_maxlevel, .. } = item.quality() {
@@ -109,13 +198,24 @@ impl<T: WarehouseItem> Warehouse<T> {
                 zones
             }
         };
-        item.set_occupied_position(Some(OccupiedPosition {
+
+        // Update the item's occupied position.
+        let occupied_position = OccupiedPosition {
             row,
             shelf,
             level,
             start_zone,
             zones_indexes,
-        }));
+        };
+
+        // Move the item into the warehouse's item list.
+        let id = item.id();
+        self.items.insert(id, {
+            let mut moved_item = item; // Ownership of `item` is moved here
+            moved_item.set_occupied_position(Some(occupied_position));
+            moved_item
+        });
+
         Ok(())
     }
 
