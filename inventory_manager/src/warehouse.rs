@@ -7,7 +7,7 @@ use std::collections::HashMap;
 pub struct Warehouse<T: WarehouseItem> {
     rows: Vec<Row>,
     items: HashMap<u64, T>,
-    robin_trakcer: (usize, usize, usize, usize),
+    robin_tracker: (usize, usize, usize, usize),
 }
 
 #[derive(Debug)]
@@ -54,7 +54,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         Self {
             rows,
             items,
-            robin_trakcer: (0, 0, 0, 0),
+            robin_tracker: (0, 0, 0, 0),
         }
     }
 
@@ -93,12 +93,12 @@ impl<T: WarehouseItem> Warehouse<T> {
     }
 
     fn round_robin_placement(&mut self, item: T) -> Result<(), &'static str> {
-        let (mut row, mut shelf, mut level, mut zone) = self.robin_trakcer;
+        let (mut row, mut shelf, mut level, mut zone) = self.robin_tracker;
 
         loop {
-            let current_row = self.rows.get(row).ok_or("Invalid row")?;
-            let current_shelf = current_row.shelves.get(shelf).ok_or("Invalid shelf")?;
-            let current_level = current_shelf.levels.get(level).ok_or("Invalid level")?;
+            let current_row = self.rows.get(row).ok_or("RoundRobin: Invalid row")?;
+            let current_shelf = current_row.shelves.get(shelf).ok_or("RoundRobin: Invalid shelf")?;
+            let current_level = current_shelf.levels.get(level).ok_or("RoundRobin: Invalid level")?;
 
             if let Some(valid_zones) = self.find_valid_zones(&item, &current_level.zones, zone) {
                 // Move the item into place_item
@@ -153,7 +153,7 @@ impl<T: WarehouseItem> Warehouse<T> {
     }
 
     fn update_robin_tracker(&mut self, row: usize, shelf: usize, level: usize, zone: usize) {
-        self.robin_trakcer = (row, shelf, level, zone);
+        self.robin_tracker = (row, shelf, level, zone);
     }
 
     pub fn place_item(
@@ -164,7 +164,6 @@ impl<T: WarehouseItem> Warehouse<T> {
         level: usize,
         start_zone: usize,
     ) -> Result<(), &'static str> {
-        // Get the level where the item needs to be placed.
         let item_level = self
             .rows
             .get_mut(row)
@@ -176,7 +175,6 @@ impl<T: WarehouseItem> Warehouse<T> {
             .get_mut(level)
             .ok_or("Invalid level.")?;
 
-        // Determine the zones to occupy based on the item's quality.
         let zones_indexes = match item.quality() {
             Quality::Normal | Quality::Fragile { .. } => {
                 if let Quality::Fragile { storage_maxlevel, .. } = item.quality() {
@@ -220,10 +218,23 @@ impl<T: WarehouseItem> Warehouse<T> {
     }
 
     pub fn remove_item(&mut self, id: &u64) -> Result<(), &'static str> {
-        if let Some(item) = self.items.get_mut(id) {
-            item.set_occupied_position(None);
+        if let Some(item) = self.items.remove(id) {
+            if let Some(position) = item.occupied_position() {
+                let row = self.rows.get_mut(position.row).ok_or("Invalid row")?;
+                let shelf = row.shelves.get_mut(position.shelf).ok_or("Invalid shelf")?;
+                let level = shelf.levels.get_mut(position.level).ok_or("Invalid level")?;
+
+                // Free the zones
+                for zone_index in &position.zones_indexes {
+                    if let Some(zone) = level.zones.get_mut(*zone_index) {
+                        *zone = Zone::new(); // Reset zone to Empty
+                    }
+                }
+            }
+            Ok(())
+        } else {
+            Err("Item not found")
         }
-        Ok(())
     }
 
     /// Since the exercise does not specify, search by name returns the first item found.

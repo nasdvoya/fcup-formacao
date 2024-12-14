@@ -50,13 +50,10 @@ fn main() {
     }
     println!("Warehouse after FirstAvailable placement: {:#?}", warehouse);
 
-    // Remove an item
-    println!("Removing item with ID 125...");
-    warehouse.remove_item(&125).unwrap();
+    warehouse.remove_item(&125);
 
-    // Re-add using RoundRobin placement strategy
-    let normal_item = SomeItem {
-        id: 125,
+    let another_normal_item = SomeItem {
+        id: 128,
         name: "NormalItem".to_string(),
         quality: Quality::Normal,
         quantity: 100,
@@ -65,8 +62,8 @@ fn main() {
     };
 
     println!("Testing RoundRobin placement strategy:");
-    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, normal_item) {
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_normal_item) {
         println!("Error: {}", e);
     }
-    // println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
+    println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
 }
