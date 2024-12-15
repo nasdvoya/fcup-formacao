@@ -78,5 +78,31 @@ fn main() {
     if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_normal_item) {
         println!("Error: {}", e);
     }
+
+    let another_big_item = SomeItem {
+        id: 400,
+        name: "NormalItem".to_string(),
+        quality: Quality::Oversized { size: 4 },
+        quantity: 100,
+        timestamp: Utc::now().timestamp(),
+        occupied_position: None,
+    };
+
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_big_item) {
+        println!("Error: {}", e);
+    }
+
+    let another_supernormal_item = SomeItem {
+        id: 666,
+        name: "NormalItem".to_string(),
+        quality: Quality::Normal,
+        quantity: 100,
+        timestamp: Utc::now().timestamp(),
+        occupied_position: None,
+    };
+
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_supernormal_item) {
+        println!("Error: {}", e);
+    }
     println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
 }

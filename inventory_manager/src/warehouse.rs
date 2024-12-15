@@ -1,6 +1,5 @@
-use chrono::{DateTime, Duration, Utc};
-
 use crate::item::{OccupiedPosition, Quality, WarehouseItem};
+use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -70,11 +69,12 @@ impl<T: WarehouseItem> Warehouse<T> {
     }
 
     fn first_available_placement(&mut self, item: T) -> Result<(), &'static str> {
-        for (row_idx, row) in self.rows.iter().enumerate() {
-            for (shelf_idx, shelf) in row.shelves.iter().enumerate() {
-                for (level_idx, level) in shelf.levels.iter().enumerate() {
+        for (row_n, row) in self.rows.iter().enumerate() {
+            for (shelf_n, shelf) in row.shelves.iter().enumerate() {
+                for (level_n, level) in shelf.levels.iter().enumerate() {
                     if let Some(valid_zones) = self.find_valid_zones(&item, &level.zones, 0) {
-                        return self.place_item(item, row_idx, shelf_idx, level_idx, valid_zones[0]);
+                        self.update_robin_tracker(row_n, shelf_n, level_n, valid_zones.last().unwrap() + 1);
+                        return self.place_item(item, row_n, shelf_n, level_n, valid_zones[0]);
                     }
                 }
             }
@@ -83,14 +83,15 @@ impl<T: WarehouseItem> Warehouse<T> {
     }
 
     fn round_robin_placement(&mut self, item: T) -> Result<(), &'static str> {
-        let (mut row, mut shelf, mut level, mut zone) = self.robin_tracker;
-
+        let (mut row, mut shelf, mut level, mut next_zone) = self.robin_tracker;
+        // TODO: If size is > total zones, break
         loop {
             let current_row = self.rows.get(row).ok_or("RoundRobin: Invalid row")?;
             let current_shelf = current_row.shelves.get(shelf).ok_or("RoundRobin: Invalid shelf")?;
             let current_level = current_shelf.levels.get(level).ok_or("RoundRobin: Invalid level")?;
 
-            if let Some(valid_zones) = self.find_valid_zones(&item, &current_level.zones, zone) {
+            // TODO: Check if level is ok for Fragile item
+            if let Some(valid_zones) = self.find_valid_zones(&item, &current_level.zones, next_zone) {
                 // Move the item into place_item
                 let result = self.place_item(item, row, shelf, level, valid_zones[0]);
                 if result.is_ok() {
@@ -100,10 +101,9 @@ impl<T: WarehouseItem> Warehouse<T> {
                 return result;
             }
 
-            // Increment through the zones in round-robin fashion
-            zone += 1;
-            if zone >= current_level.zones.len() {
-                zone = 0;
+            next_zone += 1;
+            if next_zone >= current_level.zones.len() {
+                next_zone = 0;
                 level += 1;
 
                 if level >= current_shelf.levels.len() {
@@ -123,18 +123,25 @@ impl<T: WarehouseItem> Warehouse<T> {
         }
     }
 
-    fn find_valid_zones(&self, item: &T, zones: &[Zone], start_zone: usize) -> Option<Vec<usize>> {
+    fn find_valid_zones(&self, item: &T, zones: &[Zone], next_zone: usize) -> Option<Vec<usize>> {
         match item.quality() {
             Quality::Normal | Quality::Fragile { .. } => zones
                 .iter()
                 .enumerate()
-                .skip(start_zone)
-                .find(|(_, zone)| matches!(zone.zone_type, ZoneType::Empty))
+                .skip(next_zone) // So that it doesnt start from the first zone.
+                // NOTE: Reminder, find returns "Some((index, zone))"
+                .find(|(_, zone)| match zone.zone_type {
+                    ZoneType::Empty => true,
+                    _ => false,
+                })
                 .map(|(index, _)| vec![index]),
             Quality::Oversized { size } => {
-                for start in start_zone..=zones.len() - size {
-                    let block = &zones[start..start + size];
-                    if block.iter().all(|zone| matches!(zone.zone_type, ZoneType::Empty)) {
+                for start in next_zone..=(zones.len() - size) {
+                    let zone_block = &zones[start..start + size];
+                    if zone_block.iter().all(|zone| match zone.zone_type {
+                        ZoneType::Empty => true,
+                        _ => false,
+                    }) {
                         return Some((start..start + size).collect());
                     }
                 }
