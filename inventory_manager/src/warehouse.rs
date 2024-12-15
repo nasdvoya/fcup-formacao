@@ -58,20 +58,11 @@ impl<T: WarehouseItem> Warehouse<T> {
         }
     }
 
-    pub fn add_item(&mut self, item: T) -> Result<(), &'static str> {
-        if self.items.contains_key(&item.id()) {
-            return Err("Item with specified id already exists.");
-        }
-        self.items.insert(item.id(), item);
-        Ok(())
-    }
-
     pub fn item_placement(&mut self, strategy: PlacementStrategy, item: T) -> Result<(), &'static str> {
         if self.items.contains_key(&item.id()) {
             return Err("Item with specified ID already exists.");
         }
 
-        // Handle placement logic
         match strategy {
             PlacementStrategy::FirstAvailable => self.first_available_placement(item),
             PlacementStrategy::RoundRobin => self.round_robin_placement(item),
@@ -83,7 +74,6 @@ impl<T: WarehouseItem> Warehouse<T> {
             for (shelf_idx, shelf) in row.shelves.iter().enumerate() {
                 for (level_idx, level) in shelf.levels.iter().enumerate() {
                     if let Some(valid_zones) = self.find_valid_zones(&item, &level.zones, 0) {
-                        // Move the item into place_item
                         return self.place_item(item, row_idx, shelf_idx, level_idx, valid_zones[0]);
                     }
                 }
@@ -209,7 +199,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         // Move the item into the warehouse's item list.
         let id = item.id();
         self.items.insert(id, {
-            let mut moved_item = item; // Ownership of `item` is moved here
+            let mut moved_item = item;
             moved_item.set_occupied_position(Some(occupied_position));
             moved_item
         });
@@ -224,10 +214,9 @@ impl<T: WarehouseItem> Warehouse<T> {
                 let shelf = row.shelves.get_mut(position.shelf).ok_or("Invalid shelf")?;
                 let level = shelf.levels.get_mut(position.level).ok_or("Invalid level")?;
 
-                // Free the zones
                 for zone_index in &position.zones_indexes {
                     if let Some(zone) = level.zones.get_mut(*zone_index) {
-                        *zone = Zone::new(); // Reset zone to Empty
+                        *zone = Zone::new();
                     }
                 }
             }
