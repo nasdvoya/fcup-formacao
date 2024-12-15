@@ -94,6 +94,7 @@ impl<T: WarehouseItem> Warehouse<T> {
                 // Move the item into place_item
                 let result = self.place_item(item, row, shelf, level, valid_zones[0]);
                 if result.is_ok() {
+                    println!("Item placed successfully");
                     self.update_robin_tracker(row, shelf, level, valid_zones.last().unwrap() + 1);
                 }
                 return result;

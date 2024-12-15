@@ -52,15 +52,16 @@ fn main() {
     if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, fragile_item) {
         println!("Error: {}", e);
     }
-    // println!("Warehouse after FirstAvailable placement: {:#?}", warehouse);
+    println!("Warehouse after FirstAvailable placement: {:#?}", warehouse);
 
-    warehouse.get_expire_items(Utc::now());
-    let location = warehouse.get_item_location("NormalItem".to_string());
-    let sort_result = warehouse.sort_items();
-    let item_quantity = warehouse.get_item_quantity(warehouse::SearchType::ById { id: (125) });
-    println!("NormalItem location: {:?}", location);
-    println!("Sorted items: {:?}", sort_result);
-    println!("Item quantity: {:?}", item_quantity);
+    // TEST: Test
+    // warehouse.get_expire_items(Utc::now());
+    // let location = warehouse.get_item_location("NormalItem".to_string());
+    // let sort_result = warehouse.sort_items();
+    // let item_quantity = warehouse.get_item_quantity(warehouse::SearchType::ById { id: (125) });
+    // println!("NormalItem location: {:?}", location);
+    // println!("Sorted items: {:?}", sort_result);
+    // println!("Item quantity: {:?}", item_quantity);
 
     let _ = warehouse.remove_item(&125);
 
@@ -77,5 +78,5 @@ fn main() {
     if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_normal_item) {
         println!("Error: {}", e);
     }
-    // println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
+    println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
 }
