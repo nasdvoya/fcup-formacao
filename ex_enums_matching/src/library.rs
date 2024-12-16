@@ -25,6 +25,20 @@ pub fn exercise_library() {
     library.remove_book("Some book");
 }
 
+#[derive(Eq, PartialEq, Debug)]
+struct Book {
+    isbn: Isbn,
+    details: Details,
+    keywords: HashSet<String>,
+    borrowed: bool,
+}
+
+#[derive(Eq, PartialEq, Debug)]
+struct Statue {
+    details: Details,
+    size: (usize, usize),
+}
+
 #[derive(Eq, PartialEq, Debug, Hash, Clone)]
 struct Isbn(String);
 
@@ -32,14 +46,6 @@ struct Isbn(String);
 struct Details {
     title: String,
     author: String,
-}
-
-#[derive(Eq, PartialEq, Debug)]
-struct Book {
-    isbn: Isbn,
-    details: Details,
-    keywords: HashSet<String>,
-    borrowed: bool,
 }
 
 #[derive(Debug)]
