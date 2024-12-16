@@ -3,5 +3,7 @@ members = [
     "ex_concepts",
     "ex_data_structures",
     "ex_ownership",  
-    "ex_structs", "inventory_manager",        
+    "ex_structs",
+    "ex_enums_matching",
+    "inventory_manager",        
 ]
