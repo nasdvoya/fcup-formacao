@@ -72,7 +72,7 @@ impl<T: WarehouseItem> Warehouse<T> {
         for (row_n, row) in self.rows.iter().enumerate() {
             for (shelf_n, shelf) in row.shelves.iter().enumerate() {
                 for (level_n, level) in shelf.levels.iter().enumerate() {
-                    if let Some(valid_zones) = self.find_valid_zones(&item, &level.zones, 0) {
+                    if let Some(valid_zones) = self.find_valid_spot(&item, &level.zones, &level_n, 0) {
                         self.update_robin_tracker(row_n, shelf_n, level_n, valid_zones.last().unwrap() + 1);
                         return self.place_item(item, row_n, shelf_n, level_n, valid_zones[0]);
                     }
@@ -91,7 +91,7 @@ impl<T: WarehouseItem> Warehouse<T> {
             let current_level = current_shelf.levels.get(level).ok_or("RoundRobin: Invalid level")?;
 
             // TODO: Check if level is ok for Fragile item
-            if let Some(valid_zones) = self.find_valid_zones(&item, &current_level.zones, next_zone) {
+            if let Some(valid_zones) = self.find_valid_spot(&item, &current_level.zones, &level, next_zone) {
                 // Move the item into place_item
                 let result = self.place_item(item, row, shelf, level, valid_zones[0]);
                 if result.is_ok() {
@@ -123,9 +123,26 @@ impl<T: WarehouseItem> Warehouse<T> {
         }
     }
 
-    fn find_valid_zones(&self, item: &T, zones: &[Zone], next_zone: usize) -> Option<Vec<usize>> {
+    fn find_valid_spot(&self, item: &T, zones: &[Zone], current_level: &usize, next_zone: usize) -> Option<Vec<usize>> {
         match item.quality() {
-            Quality::Normal | Quality::Fragile { .. } => zones
+            Quality::Fragile { storage_maxlevel, .. } => {
+                if current_level >= storage_maxlevel {
+                    println!("Item cannot be stored above the maximum level.");
+                    None
+                } else {
+                    zones
+                        .iter()
+                        .enumerate()
+                        .skip(next_zone) // So that it doesnt start from the first zone.
+                        // NOTE: Reminder, find returns "Some((index, zone))"
+                        .find(|(_, zone)| match zone.zone_type {
+                            ZoneType::Empty => true,
+                            _ => false,
+                        })
+                        .map(|(index, _)| vec![index])
+                }
+            }
+            Quality::Normal => zones
                 .iter()
                 .enumerate()
                 .skip(next_zone) // So that it doesnt start from the first zone.
