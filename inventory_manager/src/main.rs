@@ -17,6 +17,10 @@ fn main() {
         occupied_position: None,
     };
 
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, normal_item) {
+        println!("Error: {}", e);
+    }
+
     let oversized_item = SomeItem {
         id: 126,
         name: "OversizedItem".to_string(),
@@ -26,32 +30,43 @@ fn main() {
         occupied_position: None,
     };
 
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, oversized_item) {
+        println!("Error: {}", e);
+    }
+
+    let aitem = SomeItem {
+        id: 155,
+        name: "NormalItem".to_string(),
+        quality: Quality::Normal,
+        quantity: 101,
+        timestamp: Utc::now().timestamp(),
+        occupied_position: None,
+    };
+
+    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, aitem) {
+        println!("Error: {}", e);
+    }
+
     let time = Utc.ymd(2024, 12, 13).and_hms_opt(22, 10, 10);
     let fragile_item = SomeItem {
-        id: 127,
+        id: 222,
         name: "FragileItem".to_string(),
         quality: Quality::Fragile {
             expiration_date: match time {
                 Some(time) => time,
                 None => Utc::now(),
             },
-            storage_maxlevel: 1,
+            storage_maxlevel: 0,
         },
         quantity: 30,
         timestamp: Utc::now().timestamp(),
         occupied_position: None,
     };
 
-    println!("Testing FirstAvailable placement strategy:");
-    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, normal_item) {
-        println!("Error: {}", e);
-    }
-    if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, oversized_item) {
-        println!("Error: {}", e);
-    }
     if let Err(e) = warehouse.item_placement(PlacementStrategy::FirstAvailable, fragile_item) {
         println!("Error: {}", e);
     }
+
     println!("Warehouse after FirstAvailable placement: {:#?}", warehouse);
 
     // TEST: Test
@@ -63,46 +78,46 @@ fn main() {
     // println!("Sorted items: {:?}", sort_result);
     // println!("Item quantity: {:?}", item_quantity);
 
-    let _ = warehouse.remove_item(&125);
+    // let _ = warehouse.remove_item(&125);
 
-    let another_normal_item = SomeItem {
-        id: 128,
-        name: "NormalItem".to_string(),
-        quality: Quality::Normal,
-        quantity: 100,
-        timestamp: Utc::now().timestamp(),
-        occupied_position: None,
-    };
-
-    println!("Testing RoundRobin placement strategy:");
-    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_normal_item) {
-        println!("Error: {}", e);
-    }
-
-    let another_big_item = SomeItem {
-        id: 400,
-        name: "NormalItem".to_string(),
-        quality: Quality::Oversized { size: 4 },
-        quantity: 100,
-        timestamp: Utc::now().timestamp(),
-        occupied_position: None,
-    };
-
-    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_big_item) {
-        println!("Error: {}", e);
-    }
-
-    let another_supernormal_item = SomeItem {
-        id: 666,
-        name: "NormalItem".to_string(),
-        quality: Quality::Normal,
-        quantity: 100,
-        timestamp: Utc::now().timestamp(),
-        occupied_position: None,
-    };
-
-    if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_supernormal_item) {
-        println!("Error: {}", e);
-    }
-    println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
+    // let another_normal_item = SomeItem {
+    //     id: 128,
+    //     name: "NormalItem".to_string(),
+    //     quality: Quality::Normal,
+    //     quantity: 100,
+    //     timestamp: Utc::now().timestamp(),
+    //     occupied_position: None,
+    // };
+    //
+    // println!("Testing RoundRobin placement strategy:");
+    // if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_normal_item) {
+    //     println!("Error: {}", e);
+    // }
+    //
+    // let another_big_item = SomeItem {
+    //     id: 400,
+    //     name: "NormalItem".to_string(),
+    //     quality: Quality::Oversized { size: 4 },
+    //     quantity: 100,
+    //     timestamp: Utc::now().timestamp(),
+    //     occupied_position: None,
+    // };
+    //
+    // if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_big_item) {
+    //     println!("Error: {}", e);
+    // }
+    //
+    // let another_supernormal_item = SomeItem {
+    //     id: 666,
+    //     name: "NormalItem".to_string(),
+    //     quality: Quality::Normal,
+    //     quantity: 100,
+    //     timestamp: Utc::now().timestamp(),
+    //     occupied_position: None,
+    // };
+    //
+    // if let Err(e) = warehouse.item_placement(PlacementStrategy::RoundRobin, another_supernormal_item) {
+    //     println!("Error: {}", e);
+    // }
+    // println!("Warehouse after RoundRobin placement: {:#?}", warehouse);
 }

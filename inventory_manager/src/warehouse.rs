@@ -32,7 +32,7 @@ struct Zone {
 #[derive(Debug)]
 enum ZoneType {
     Empty,
-    NormalItem { id: u64 },
+    NormalOrFragileItem { id: u64 },
     OversizedItem { id: u64 },
 }
 
@@ -126,8 +126,11 @@ impl<T: WarehouseItem> Warehouse<T> {
     fn find_valid_spot(&self, item: &T, zones: &[Zone], current_level: &usize, next_zone: usize) -> Option<Vec<usize>> {
         match item.quality() {
             Quality::Fragile { storage_maxlevel, .. } => {
-                if current_level >= storage_maxlevel {
-                    println!("Item cannot be stored above the maximum level.");
+                if current_level > storage_maxlevel {
+                    println!(
+                        "Item cannot be stored above the maximum level. current is : {} itemax is: {}",
+                        current_level, storage_maxlevel
+                    );
                     None
                 } else {
                     zones
@@ -193,7 +196,8 @@ impl<T: WarehouseItem> Warehouse<T> {
         let zones_indexes = match item.quality() {
             Quality::Normal | Quality::Fragile { .. } => {
                 if let Quality::Fragile { storage_maxlevel, .. } = item.quality() {
-                    if level >= *storage_maxlevel {
+                    // TODO: Might be a overkill...
+                    if level > *storage_maxlevel {
                         return Err("Item cannot be stored above the maximum level.");
                     }
                 }
@@ -333,7 +337,7 @@ impl Zone {
 
     fn normal_item(id: u64) -> Self {
         Self {
-            zone_type: ZoneType::NormalItem { id },
+            zone_type: ZoneType::NormalOrFragileItem { id },
         }
     }
 
