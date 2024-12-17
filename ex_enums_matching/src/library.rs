@@ -10,6 +10,12 @@ pub fn exercise_library() {
     library.find_books_by_author("Klabnik");
     library.find_book_by_title("The Rust Programming Language");
 
+    let book = LibraryItems::Book {
+        details: Details::new("".to_string(), "".to_string()),
+        keywords: HashSet::from(["something".to_string(), "something".to_string()]),
+        borrowed: false,
+    };
+
     let new_book = Book::new(
         Isbn::new(),
         Details::new("Some cool book".to_string(), "JohnyDoes".to_string()),
@@ -36,7 +42,11 @@ struct Book {
 #[derive(Eq, PartialEq, Debug)]
 struct Statue {
     details: Details,
-    size: (usize, usize),
+    size: (usize, usize, usize),
+}
+#[derive(Eq, PartialEq, Debug)]
+struct Painting {
+    details: Details,
 }
 
 #[derive(Eq, PartialEq, Debug, Hash, Clone)]
@@ -49,7 +59,28 @@ struct Details {
 }
 
 #[derive(Debug)]
-struct Library(HashMap<Isbn, Book>);
+enum LibraryItems {
+    Panting {
+        details: Details,
+    },
+    Statue {
+        details: Details,
+        size: (u32, u32, u32),
+    },
+    Book {
+        details: Details,
+        keywords: HashSet<String>,
+        borrowed: bool,
+    },
+    AudioBook {
+        details: Details,
+        keywords: HashSet<String>,
+        borrowed: bool,
+    },
+}
+
+#[derive(Debug)]
+struct Library(HashMap<Isbn, LibraryItems>);
 
 impl Book {
     fn new(isbn: Isbn, details: Details, keywords: HashSet<String>, borrowed: bool) -> Self {
@@ -77,27 +108,17 @@ impl Details {
 
 impl Library {
     fn new() -> Self {
-        let mut books: HashMap<Isbn, Book> = HashMap::new();
+        let mut books: HashMap<Isbn, LibraryItems> = HashMap::new();
         // TODO: Fazer sem cloning?
-        let book1_isbn = Isbn::new();
-        let book1 = Book::new(
-            book1_isbn.clone(),
-            Details::new(
-                "The Rust Programming Language".to_string(),
-                "Steve Klabnik and Carol Nichols".to_string(),
-            ),
-            HashSet::from(["test1".to_string(), "test2".to_string()]),
-            false,
-        );
+
         let book2_isbn = Isbn::new();
-        let book2 = Book::new(
-            book2_isbn.clone(),
-            Details::new("The Language".to_string(), "Stevand Carol".to_string()),
-            HashSet::from(["test3".to_string(), "test4".to_string()]),
-            false,
-        );
-        books.insert(book1_isbn, book1);
-        books.insert(book2_isbn, book2);
+        let booky = LibraryItems::Book {
+            details: Details::new("".to_string(), "".to_string()),
+            keywords: HashSet::from(["something".to_string(), "something".to_string()]),
+            borrowed: false,
+        };
+
+        books.insert(book2_isbn, booky);
         Self(books)
     }
 
@@ -197,10 +218,21 @@ impl Library {
     }
 
     fn remove_book(&mut self, title: &str) {
+        // let book_key = self
+        //     .0
+        //     .iter()
+        //     .find(|(_, book)| book.details.title == title)
+        //     .map(|(isbn, _)| isbn.clone());
+
         let book_key = self
             .0
             .iter()
-            .find(|(_, book)| book.details.title == title)
+            .find(|(_, library_item)| match library_item {
+                LibraryItems::Panting { details, .. }
+                | LibraryItems::Statue { details, .. }
+                | LibraryItems::Book { details, .. }
+                | LibraryItems::AudioBook { details, .. } => details.title == title,
+            })
             .map(|(isbn, _)| isbn.clone());
 
         match book_key {
