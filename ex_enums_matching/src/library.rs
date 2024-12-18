@@ -123,11 +123,13 @@ impl Library {
     }
 
     fn search_intersection_keywords(&self, keys: Vec<String>) {
-        let match_books: Vec<&Book> = self
-            .0
-            .values()
-            .filter(|book| keys.iter().all(|key| book.keywords.contains(key)))
-            .collect();
+        // let match_books: Vec<&Book> = self
+        //     .0
+        //     .values()
+        //     .filter(|book| keys.iter().all(|key| book.keywords.contains(key)))
+        //     .collect();
+
+        let match_books: Vec<LibraryItems> = self.0.values().filter(|lib_item| keys.iter().all(|key| )) 
 
         if match_books.is_empty() {
             println!("No books contain specified keywords: {:?}", keys);
@@ -218,12 +220,6 @@ impl Library {
     }
 
     fn remove_book(&mut self, title: &str) {
-        // let book_key = self
-        //     .0
-        //     .iter()
-        //     .find(|(_, book)| book.details.title == title)
-        //     .map(|(isbn, _)| isbn.clone());
-
         let book_key = self
             .0
             .iter()
