@@ -122,29 +122,17 @@ impl Library {
         Self(books)
     }
 
+    // Search for book or audiobooks that contain instersection of keys.
     fn search_intersection_keywords(&self, keys: Vec<String>) {
-        // let match_books: Vec<&Book> = self
-        //     .0
-        //     .values()
-        //     .filter(|book| keys.iter().all(|key| book.keywords.contains(key)))
-        //     .collect();
-
-        let match_books: Vec<LibraryItems> = self.0.values().filter(|lib_item| keys.iter().all(|key| )) 
-
-        if match_books.is_empty() {
-            println!("No books contain specified keywords: {:?}", keys);
-        } else {
-            for book in match_books {
-                println!("{:?}", book);
-            }
-        }
-    }
-
-    fn search_union_keywords(&self, keys: Vec<String>) {
-        let match_books: Vec<&Book> = self
+        let match_books: Vec<&LibraryItems> = self
             .0
             .values()
-            .filter(|book| keys.iter().any(|key| book.keywords.contains(key)))
+            .filter(|lib_item| match lib_item {
+                LibraryItems::Book { keywords, .. } | LibraryItems::AudioBook { keywords, .. } => {
+                    keys.iter().all(|key| keywords.contains(key))
+                }
+                _ => false,
+            })
             .collect();
 
         if match_books.is_empty() {
@@ -156,8 +144,38 @@ impl Library {
         }
     }
 
+    // Search for book or audiobooks that contain union of keys.
+    fn search_union_keywords(&self, keys: Vec<String>) {
+        let match_books: Vec<&LibraryItems> = self
+            .0
+            .values()
+            .filter(|lib_item| match lib_item {
+                LibraryItems::Book { keywords, .. } | LibraryItems::AudioBook { keywords, .. } => {
+                    keys.iter().any(|key| keywords.contains(key))
+                }
+                _ => false,
+            })
+            .collect();
+
+        if match_books.is_empty() {
+            println!("No books contain specified keywords: {:?}", keys);
+        } else {
+            for book in match_books {
+                println!("{:?}", book);
+            }
+        }
+    }
+
+    /// Find book or audio book by author.
     fn find_books_by_author(&self, author: &str) {
-        let books_by_author: Vec<&Book> = self.0.values().filter(|book| book.details.author == author).collect();
+        let books_by_author: Vec<&LibraryItems> = self
+            .0
+            .values()
+            .filter(|lib_item| match lib_item {
+                LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => author == details.author,
+                _ => false,
+            })
+            .collect();
 
         if books_by_author.is_empty() {
             println!("No books found by author: {}", author);
@@ -169,44 +187,58 @@ impl Library {
         }
     }
 
+    /// Find book or audio book by title.
     fn find_book_by_title(&self, title: &str) {
-        let book = self.0.values().find(|book| book.details.title == title);
-
+        let book = self.0.values().find(|lib_item| match lib_item {
+            LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => details.title == title,
+            _ => false,
+        });
         match book {
             Some(book) => println!("Found book by title '{}':\n{:?}", title, book),
             None => println!("No book found with title: {}", title),
         }
     }
 
+    /// Borrow book or audiobook. I guess we are not allowed to borrow statues...
     fn borrow_book(&mut self, title: &str) {
-        let book = self.0.values_mut().find(|book| book.details.title == title);
+        // let book = self.0.values_mut().find(|book| book.details.title == title);
+        let book = self.0.values_mut().find(|lib_item| match lib_item {
+            LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => details.title == title,
+            _ => false,
+        });
 
         match book {
-            Some(book) => {
-                if book.borrowed {
-                    println!("The book '{}' is already borrowed.", title);
+            Some(LibraryItems::Book { borrowed, .. } | LibraryItems::AudioBook { borrowed, .. }) => {
+                if *borrowed {
+                    println!("The book/audiobook {} is already borrowed", title);
                 } else {
-                    book.borrowed = true;
-                    println!("You borrowed the book '{}'.", title);
+                    *borrowed = true;
+                    println!("You just borrowed the book {}", title);
                 }
             }
-            None => println!("Book not found: {}", title),
+            _ => println!("Book not found: {}", title),
         }
     }
 
+    /// Return the borrowed book
     fn return_book(&mut self, title: &str) {
-        let book = self.0.values_mut().find(|book| book.details.title == title);
+        // let book = self.0.values_mut().find(|book| book.details.title == title);
+
+        let book = self.0.values_mut().find(|lib_item| match lib_item {
+            LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => details.title == title,
+            _ => false,
+        });
 
         match book {
-            Some(book) => {
-                if !book.borrowed {
+            Some(LibraryItems::Book { borrowed, .. } | LibraryItems::AudioBook { borrowed, .. }) => {
+                if !*borrowed {
                     println!("The book '{}' was not borrowed.", title);
                 } else {
-                    book.borrowed = false;
+                    *borrowed = false;
                     println!("You returned the book '{}'.", title);
                 }
             }
-            None => println!("Book not found: {}", title),
+            _ => println!("Book not found: {}", title),
         }
     }
 
