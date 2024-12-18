@@ -10,7 +10,7 @@ pub fn exercise_library() {
     library.find_books_by_author("Klabnik");
     library.find_book_by_title("The Rust Programming Language");
 
-    let book = LibraryItems::Book {
+    let book = LibraryItem::Book {
         details: Details::new("".to_string(), "".to_string()),
         keywords: HashSet::from(["something".to_string(), "something".to_string()]),
         borrowed: false,
@@ -59,7 +59,7 @@ struct Details {
 }
 
 #[derive(Debug)]
-enum LibraryItems {
+enum LibraryItem {
     Panting {
         details: Details,
     },
@@ -80,7 +80,7 @@ enum LibraryItems {
 }
 
 #[derive(Debug)]
-struct Library(HashMap<Isbn, LibraryItems>);
+struct Library(HashMap<Isbn, LibraryItem>);
 
 impl Book {
     fn new(isbn: Isbn, details: Details, keywords: HashSet<String>, borrowed: bool) -> Self {
@@ -108,11 +108,11 @@ impl Details {
 
 impl Library {
     fn new() -> Self {
-        let mut books: HashMap<Isbn, LibraryItems> = HashMap::new();
+        let mut books: HashMap<Isbn, LibraryItem> = HashMap::new();
         // TODO: Fazer sem cloning?
 
         let book2_isbn = Isbn::new();
-        let booky = LibraryItems::Book {
+        let booky = LibraryItem::Book {
             details: Details::new("".to_string(), "".to_string()),
             keywords: HashSet::from(["something".to_string(), "something".to_string()]),
             borrowed: false,
@@ -124,11 +124,11 @@ impl Library {
 
     // Search for book or audiobooks that contain instersection of keys.
     fn search_intersection_keywords(&self, keys: Vec<String>) {
-        let match_books: Vec<&LibraryItems> = self
+        let match_books: Vec<&LibraryItem> = self
             .0
             .values()
             .filter(|lib_item| match lib_item {
-                LibraryItems::Book { keywords, .. } | LibraryItems::AudioBook { keywords, .. } => {
+                LibraryItem::Book { keywords, .. } | LibraryItem::AudioBook { keywords, .. } => {
                     keys.iter().all(|key| keywords.contains(key))
                 }
                 _ => false,
@@ -146,11 +146,11 @@ impl Library {
 
     // Search for book or audiobooks that contain union of keys.
     fn search_union_keywords(&self, keys: Vec<String>) {
-        let match_books: Vec<&LibraryItems> = self
+        let match_books: Vec<&LibraryItem> = self
             .0
             .values()
             .filter(|lib_item| match lib_item {
-                LibraryItems::Book { keywords, .. } | LibraryItems::AudioBook { keywords, .. } => {
+                LibraryItem::Book { keywords, .. } | LibraryItem::AudioBook { keywords, .. } => {
                     keys.iter().any(|key| keywords.contains(key))
                 }
                 _ => false,
@@ -168,11 +168,11 @@ impl Library {
 
     /// Find book or audio book by author.
     fn find_books_by_author(&self, author: &str) {
-        let books_by_author: Vec<&LibraryItems> = self
+        let books_by_author: Vec<&LibraryItem> = self
             .0
             .values()
             .filter(|lib_item| match lib_item {
-                LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => author == details.author,
+                LibraryItem::Book { details, .. } | LibraryItem::AudioBook { details, .. } => author == details.author,
                 _ => false,
             })
             .collect();
@@ -190,7 +190,7 @@ impl Library {
     /// Find book or audio book by title.
     fn find_book_by_title(&self, title: &str) {
         let book = self.0.values().find(|lib_item| match lib_item {
-            LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => details.title == title,
+            LibraryItem::Book { details, .. } | LibraryItem::AudioBook { details, .. } => details.title == title,
             _ => false,
         });
         match book {
@@ -203,12 +203,12 @@ impl Library {
     fn borrow_book(&mut self, title: &str) {
         // let book = self.0.values_mut().find(|book| book.details.title == title);
         let book = self.0.values_mut().find(|lib_item| match lib_item {
-            LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => details.title == title,
+            LibraryItem::Book { details, .. } | LibraryItem::AudioBook { details, .. } => details.title == title,
             _ => false,
         });
 
         match book {
-            Some(LibraryItems::Book { borrowed, .. } | LibraryItems::AudioBook { borrowed, .. }) => {
+            Some(LibraryItem::Book { borrowed, .. } | LibraryItem::AudioBook { borrowed, .. }) => {
                 if *borrowed {
                     println!("The book/audiobook {} is already borrowed", title);
                 } else {
@@ -220,17 +220,15 @@ impl Library {
         }
     }
 
-    /// Return the borrowed book
+    /// Return the borrowed book or audiobook
     fn return_book(&mut self, title: &str) {
-        // let book = self.0.values_mut().find(|book| book.details.title == title);
-
         let book = self.0.values_mut().find(|lib_item| match lib_item {
-            LibraryItems::Book { details, .. } | LibraryItems::AudioBook { details, .. } => details.title == title,
+            LibraryItem::Book { details, .. } | LibraryItem::AudioBook { details, .. } => details.title == title,
             _ => false,
         });
 
         match book {
-            Some(LibraryItems::Book { borrowed, .. } | LibraryItems::AudioBook { borrowed, .. }) => {
+            Some(LibraryItem::Book { borrowed, .. } | LibraryItem::AudioBook { borrowed, .. }) => {
                 if !*borrowed {
                     println!("The book '{}' was not borrowed.", title);
                 } else {
@@ -242,13 +240,20 @@ impl Library {
         }
     }
 
-    fn add_book(&mut self, book: Book) {
-        if self.0.contains_key(&book.isbn) {
-            println!("Book with ISBN {} already exists.", book.isbn.0);
-        } else {
-            self.0.insert(book.isbn.clone(), book);
-            println!("Book added successfully.");
-        }
+    fn add_book(&mut self, lib_item: LibraryItem) {
+        let book = match lib_item {
+            LibraryItem::Book { details, .. } | LibraryItem::AudioBook { details, .. } =>  {
+                if self.0.contains_key(details.)
+            },
+            _ => todo!(),
+        };
+
+        // if self.0.contains_key(&lib_item.isbn) {
+        //     println!("Book with ISBN {} already exists.", lib_item.isbn.0);
+        // } else {
+        //     self.0.insert(lib_item.isbn.clone(), lib_item);
+        //     println!("Book added successfully.");
+        // }
     }
 
     fn remove_book(&mut self, title: &str) {
@@ -256,10 +261,10 @@ impl Library {
             .0
             .iter()
             .find(|(_, library_item)| match library_item {
-                LibraryItems::Panting { details, .. }
-                | LibraryItems::Statue { details, .. }
-                | LibraryItems::Book { details, .. }
-                | LibraryItems::AudioBook { details, .. } => details.title == title,
+                LibraryItem::Panting { details, .. }
+                | LibraryItem::Statue { details, .. }
+                | LibraryItem::Book { details, .. }
+                | LibraryItem::AudioBook { details, .. } => details.title == title,
             })
             .map(|(isbn, _)| isbn.clone());
 
