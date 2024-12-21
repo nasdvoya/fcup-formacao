@@ -5,5 +5,6 @@ members = [
     "ex_ownership",  
     "ex_structs",
     "ex_enums_matching",
+    "ex_nulls_errors",
     "inventory_manager",        
 ]
