@@ -1,6 +1,8 @@
+use geometric_forms::exercise_geometric_forms;
 use library::exercise_library;
 
 mod library;
+mod geometric_forms;
 
 /// Formas geométricas: Crie structs que representem várias formas geométricas
 /// (Quadrado, circulo, elipse, Triângulo, Cubo, Cilindro, Esfera).
@@ -13,5 +15,6 @@ mod library;
 /// (por exemplo, todos os elementos têm titulo e autor, mas apenas os audio books têm durações, apenas as estátuas têm dimensões, etc).
 
 fn main() {
-    exercise_library();
+    // exercise_library();
+    exercise_geometric_forms();
 }
