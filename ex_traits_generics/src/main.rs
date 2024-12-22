@@ -7,11 +7,14 @@
 // Merceria 4.0: Incremente a merceria ao definir uma trait que defina os comportamentos necessários de um artigo. 
 // A nossa merceria deve ser capaz de ser utilizada para um tipo de item genérico. Devemos manter todas as capacidades anteriores.
 
+use generic_stack::exercise_generic_stack;
 use store::exercise_store;
 
 mod generic_sorting;
 mod store;
+mod generic_stack;
 
 fn main() {
     exercise_store();
+    exercise_generic_stack();
 }
