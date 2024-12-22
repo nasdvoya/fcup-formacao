@@ -16,7 +16,7 @@ mod tests {
 
 fn bubble_sort<T: Ord>(arr: &mut Vec<T>) {
     let len = arr.len();
-    
+
     for i in 0..len {
         for j in 0..len - 1 - i {
             if arr[j] > arr[j + 1] {
@@ -27,5 +27,21 @@ fn bubble_sort<T: Ord>(arr: &mut Vec<T>) {
 }
 
 pub fn selection_sort<T: Ord>(arr: &mut Vec<T>) {
+    let len = arr.len();
+    // Find smallest element and swap it first element
+    // Find the second smallest and swap it with the second one
+    // etc.
 
+    for i in 0..len {
+        let mut min_val = i;
+        for j in (i + 1)..len {
+            if arr[j] < arr[min_val] {
+                min_val = j
+            }
+        }
+
+        if min_val != i {
+            arr.swap(i, min_val);
+        }
+    }
 }
