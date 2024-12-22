@@ -9,6 +9,7 @@
 
 use store::exercise_store;
 
+mod generic_sorting;
 mod store;
 
 fn main() {
